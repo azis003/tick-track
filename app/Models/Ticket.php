@@ -23,7 +23,7 @@ class Ticket extends Model
         'status',
         'assigned_to_id',
         'assigned_by_id',
-        'asigned_at',
+        'assigned_at',
         'started_at',
         'resolved_at',
         'closed_at',
@@ -36,7 +36,7 @@ class Ticket extends Model
     ];
 
     protected $casts = [
-        'asigned_at' => 'datetime',
+        'assigned_at' => 'datetime',
         'started_at' => 'datetime',
         'resolved_at' => 'datetime',
         'closed_at' => 'datetime',
@@ -65,7 +65,7 @@ class Ticket extends Model
         return $this->belongsTo(Priority::class, 'user_priority_id');
     }
 
-    public function finalPriority()
+    public function finalPriority(): BelongsTo
     {
         return $this->belongsTo(Priority::class, 'final_priority_id');
     }

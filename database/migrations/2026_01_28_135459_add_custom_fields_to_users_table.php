@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('nip', 50)->unique()->after('id');
+            $table->string('nip', 50)->nullable()->unique()->after('id');
             $table->string('phone', 20)->nullable()->after('password');
             $table->string('avatar', 255)->nullable()->after('phone');
             $table->foreignId('unit_id')->nullable()->after('avatar')->constrained('units')->nullOnDelete();

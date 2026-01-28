@@ -25,7 +25,7 @@ return new class extends Migration {
                 'waiting_approval',
                 'resolved',
                 'closed',
-                'reopen'
+                'reopened'
             ])->nullable();
             $table->enum('to_status', [
                 'new',
@@ -37,7 +37,7 @@ return new class extends Migration {
                 'waiting_approval',
                 'resolved',
                 'closed',
-                'reopen'
+                'reopened'
             ]);
             $table->text('notes')->nullable();
             $table->timestamp('created_at');
