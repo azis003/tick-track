@@ -14,10 +14,10 @@ export function hasPermission(permissions) {
  * Karena di HandleInertiaRequests.php data ada di props.auth.permissions
  */
 export function hasAnyPermission(permissions) {
-    //1. ambil data permission yang ada di usePage
     const allPermissions = usePage().props.auth.permissions;
 
-    //2. loop setiap permission yang diminta dan cek di list 'allPermissions'
+    if (!allPermissions || !permissions) return false;
+
     let hasPermission = false;
     permissions.forEach(function (item) {
         if (allPermissions[item]) {
@@ -29,13 +29,9 @@ export function hasAnyPermission(permissions) {
 }
 
 export function hasRole(role) {
-    //1. ambil data roles dari shared data
     const allRoles = usePage().props.auth.roles;
 
-    if (!auth.user || !auth.user.roles) {
-        return false;
-    }
+    if (!allRoles) return false;
 
-    //2. cek apakah user memiliki role yang diminta
-    return auth.user.roles.includes(roleName);
+    return allRoles.includes(role);
 }
