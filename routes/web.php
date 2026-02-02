@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,3 +26,12 @@ Route::post('/login', [LoginController::class, 'store'])
 Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
+
+// ==============================================
+// ROUTES UNTUK ADMIN (Authenticated Users)
+// ==============================================
+
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+});

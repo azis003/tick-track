@@ -42,7 +42,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             // redirect route dashboard dengan flash message success
-            return redirect()->route('dashboard')
+            return redirect()->route('admin.dashboard')
                 ->with('success', 'Selamat Datang Kembali!');
         }
 
