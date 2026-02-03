@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-100">
+    <div class="flex flex-col min-h-screen bg-slate-100">
         <!-- Top Navigation Bar -->
         <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -193,7 +193,7 @@ onBeforeUnmount(() => {
         </nav>
 
         <!-- Main Content Area -->
-        <main class="py-8">
+        <main class="flex-1 py-8">
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <slot />
             </div>

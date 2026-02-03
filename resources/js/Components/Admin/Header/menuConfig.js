@@ -39,8 +39,15 @@ export const menuItems = [
     {
         name: "Tiket",
         icon: Ticket,
-        permissions: ['create-ticket', 'view-own-ticket', 'work-ticket', 'triage-ticket', 'view-unit-ticket', 'view-all-ticket'],
+        permissions: ['create-ticket', 'view-own-ticket', 'triage-ticket', 'view-all-ticket'],
         dropdown: [
+            {
+                name: "Semua Tiket",
+                href: "/admin/tickets",
+                icon: Database,
+                description: "Database seluruh tiket sistem",
+                permissions: ['view-all-ticket']
+            },
             {
                 name: "Buat Tiket",
                 href: "/admin/tickets/create",
@@ -56,40 +63,26 @@ export const menuItems = [
                 permissions: ['view-own-ticket']
             },
             {
-                name: "Tiket Ditugaskan",
-                href: "/admin/tickets/assigned",
-                icon: UserCheck,
-                description: "Tugas pengerjaan untuk Anda",
-                permissions: ['work-ticket']
-            },
-            {
                 name: "Perlu Triage",
                 href: "/admin/tickets/triage",
                 icon: AlertCircle,
                 description: "Verifikasi tiket oleh Helpdesk",
                 permissions: ['triage-ticket']
             },
-            {
-                name: "Semua Tiket",
-                href: "/admin/tickets",
-                icon: Database,
-                description: "Database seluruh tiket sistem",
-                permissions: ['view-all-ticket']
-            },
-            {
-                name: "Tiket Tim",
-                href: "/admin/tickets/team",
-                icon: Users2,
-                description: "Monitor tiket anggota unit Anda",
-                permissions: ['view-unit-ticket']
-            },
         ],
     },
     {
         name: "Master Data",
         icon: Database,
-        permissions: ['manage-units', 'manage-categories', 'manage-priorities'],
+        permissions: ['manage-users', 'manage-units', 'manage-categories', 'manage-priorities'],
         dropdown: [
+            {
+                name: "User",
+                href: "/admin/users",
+                icon: Users,
+                description: "Manajemen data pengguna sistem",
+                permissions: ['manage-users']
+            },
             {
                 name: "Unit Kerja",
                 href: "/admin/units",
@@ -98,14 +91,14 @@ export const menuItems = [
                 permissions: ['manage-units']
             },
             {
-                name: "Kategori Tiket",
+                name: "Kategori",
                 href: "/admin/categories",
                 icon: Tags,
                 description: "Klasifikasi kategori kendala TI",
                 permissions: ['manage-categories']
             },
             {
-                name: "Prioritas & SLA",
+                name: "Prioritas",
                 href: "/admin/priorities",
                 icon: Shield,
                 description: "Atur skala urgensi & SLA tiket",
@@ -137,15 +130,8 @@ export const menuItems = [
     {
         name: "Pengaturan",
         icon: Settings,
-        permissions: ['manage-users', 'manage-roles', 'manage-permissions', 'system-config', 'view-system-logs'],
+        permissions: ['manage-roles', 'manage-permissions', 'system-config', 'view-system-logs'],
         dropdown: [
-            {
-                name: "Users",
-                href: "/admin/users",
-                icon: Users,
-                description: "Manajemen data pengguna sistem",
-                permissions: ['manage-users']
-            },
             {
                 name: "Roles",
                 href: "/admin/roles",

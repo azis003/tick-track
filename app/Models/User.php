@@ -73,4 +73,20 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Unit::class);
     }
+
+    /**
+     * Tiket yang dilaporkan user ini
+     */
+    public function reportedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'reporter_id');
+    }
+
+    /**
+     * Tiket yang ditugaskan ke user ini (untuk teknisi)
+     */
+    public function assignedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'assigned_to_id');
+    }
 }
