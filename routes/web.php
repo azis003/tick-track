@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\RoleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,5 +49,19 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             'edit' => 'admin.permissions.edit',
             'update' => 'admin.permissions.update',
             'destroy' => 'admin.permissions.destroy',
+        ]);
+
+    // ==============================================
+    // MASTER DATA - Roles CRUD
+    // ==============================================
+    Route::resource('roles', RoleController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'admin.roles.index',
+            'create' => 'admin.roles.create',
+            'store' => 'admin.roles.store',
+            'edit' => 'admin.roles.edit',
+            'update' => 'admin.roles.update',
+            'destroy' => 'admin.roles.destroy',
         ]);
 });

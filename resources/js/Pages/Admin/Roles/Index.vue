@@ -15,20 +15,24 @@ import Pagination from '@/Shared/Pagination.vue'
 import TableEmpty from '@/Shared/TableEmpty.vue'
 
 // import icons
-import { Search, Pencil, Shield } from 'lucide-vue-next'
+import { Search, Pencil, Shield, Users, Key } from 'lucide-vue-next'
 
 // import permission helper
 import { hasAnyPermission } from '@/Utils/Permissions'
 
 // props
 const props = defineProps({
-    permissions: {
+    roles: {
         type: Object,
         default: () => ({}),
     },
     filters: {
         type: Object,
         default: () => ({}),
+    },
+    protectedRoles: {
+        type: Array,
+        default: () => [],
     },
 })
 
@@ -41,26 +45,44 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/permissions',
+            '/admin/roles',
             { search: newValue },
             { preserveState: true, replace: true }
         )
     }, 300)
 })
+
+// Role badge colors
+const getRoleBadgeClass = (roleName) => {
+    const colors = {
+        'super_admin': 'bg-red-100 text-red-800 border-red-200',
+        'manager': 'bg-purple-100 text-purple-800 border-purple-200',
+        'helpdesk': 'bg-blue-100 text-blue-800 border-blue-200',
+        'teknisi': 'bg-green-100 text-green-800 border-green-200',
+        'ketua_tim': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        'pegawai': 'bg-gray-100 text-gray-800 border-gray-200',
+    }
+    return colors[roleName] || 'bg-slate-100 text-slate-800 border-slate-200'
+}
+
+// Check if role is protected
+const isProtected = (roleName) => {
+    return props.protectedRoles.includes(roleName)
+}
 </script>
 
 <template>
-    <Head title="Data Permission" />
+    <Head title="Data Role" />
 
     <LayoutAdmin>
         <!-- Page Header -->
         <PageHeader
-            title="Data Permission"
-            description="Kelola daftar permission sistem"
+            title="Data Role"
+            description="Kelola daftar role dan permissions pengguna"
             :showButton="true"
-            action="/admin/permissions/create"
-            actionText="Tambah Permission"
-            permission="permissions.create"
+            action="/admin/roles/create"
+            actionText="Tambah Role"
+            permission="roles.create"
         />
 
         <!-- Search & Filter Card -->
@@ -76,7 +98,7 @@ watch(search, (newValue) => {
                             <input
                                 type="search"
                                 v-model="search"
-                                placeholder="Cari permission..."
+                                placeholder="Cari role..."
                                 class="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200"
                             />
                         </div>
@@ -95,13 +117,13 @@ watch(search, (newValue) => {
                                 No
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Nama Permission
+                                Nama Role
                             </th>
-                            <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
-                                Guard
-                            </th> -->
                             <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-36">
-                                Digunakan Role
+                                Permissions
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
+                                Users
                             </th>
                             <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
                                 Aksi
@@ -111,69 +133,85 @@ watch(search, (newValue) => {
                     <tbody class="bg-white divide-y divide-gray-200">
                         <!-- Data rows -->
                         <tr
-                            v-for="(permission, index) in permissions.data"
-                            :key="permission.id"
+                            v-for="(role, index) in roles.data"
+                            :key="role.id"
                             class="hover:bg-gray-50 transition-colors duration-150"
                         >
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ (permissions.current_page - 1) * permissions.per_page + index + 1 }}
+                                {{ (roles.current_page - 1) * roles.per_page + index + 1 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <!-- <div class="flex-shrink-0 h-8 w-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                        <Shield class="w-4 h-4 text-indigo-600" />
-                                    </div> -->
-                                    <div class="ml-3">
-                                        <span class="text-sm font-medium text-gray-900 font-mono">
-                                            {{ permission.name }}
-                                        </span>
-                                    </div>
+                                    <span
+                                        :class="[
+                                            'inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border',
+                                            getRoleBadgeClass(role.name)
+                                        ]"
+                                    >
+                                        <!-- <Shield class="w-4 h-4 mr-2" /> -->
+                                        {{ role.name }}
+                                    </span>
+                                    <span
+                                        v-if="isProtected(role.name)"
+                                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700"
+                                    >
+                                        Protected
+                                    </span>
                                 </div>
                             </td>
-                            <!-- <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    {{ permission.guard_name }}
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700">
+                                    <!-- <Key class="w-3.5 h-3.5 mr-1.5" /> -->
+                                    {{ role.permissions_count }} izin
                                 </span>
-                            </td> -->
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span
                                     :class="[
-                                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                                        permission.roles_count > 0
-                                            ? 'bg-blue-100 text-blue-800'
-                                            : 'bg-gray-100 text-gray-500'
+                                        'inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium',
+                                        role.users_count > 0
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'bg-gray-50 text-gray-500'
                                     ]"
                                 >
-                                    {{ permission.roles_count }} role{{ permission.roles_count !== 1 ? 's' : '' }}
+                                    <Users class="w-3.5 h-3.5 mr-1.5" />
+                                    {{ role.users_count }} user{{ role.users_count !== 1 ? 's' : '' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <div class="flex items-center justify-center space-x-2">
                                     <!-- Edit Button -->
                                     <Link
-                                        v-if="hasAnyPermission(['permissions.edit'])"
-                                        :href="`/admin/permissions/${permission.id}/edit`"
+                                        v-if="hasAnyPermission(['roles.edit'])"
+                                        :href="`/admin/roles/${role.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
                                         <Pencil class="w-4 h-4" />
                                     </Link>
 
-                                    <!-- Delete Button -->
+                                    <!-- Delete Button (disabled for protected roles) -->
                                     <Delete
-                                        v-if="hasAnyPermission(['permissions.delete'])"
-                                        URL="/admin/permissions"
-                                        :id="permission.id"
+                                        v-if="hasAnyPermission(['roles.delete']) && !isProtected(role.name)"
+                                        URL="/admin/roles"
+                                        :id="role.id"
                                     />
+                                    <span
+                                        v-else-if="hasAnyPermission(['roles.delete']) && isProtected(role.name)"
+                                        class="inline-flex items-center p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                                        title="Role ini tidak dapat dihapus"
+                                    >
+                                        🔒
+                                    </span>
                                 </div>
                             </td>
                         </tr>
 
                         <!-- Empty state -->
                         <TableEmpty
-                            v-if="permissions.data?.length === 0"
-                            title="Tidak ada data permission"
-                            description="Belum ada permission yang ditambahkan atau tidak ditemukan hasil pencarian."
+                            v-if="roles.data?.length === 0"
+                            title="Tidak ada data role"
+                            description="Belum ada role yang ditambahkan atau tidak ditemukan hasil pencarian."
                             :colSpan="5"
                         />
                     </tbody>
@@ -181,18 +219,18 @@ watch(search, (newValue) => {
             </div>
 
             <!-- Pagination -->
-            <div v-if="permissions.data?.length > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div v-if="roles.data?.length > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <p class="text-sm text-gray-600">
                         Menampilkan
-                        <span class="font-semibold">{{ permissions.from }}</span>
+                        <span class="font-semibold">{{ roles.from }}</span>
                         -
-                        <span class="font-semibold">{{ permissions.to }}</span>
+                        <span class="font-semibold">{{ roles.to }}</span>
                         dari
-                        <span class="font-semibold">{{ permissions.total }}</span>
+                        <span class="font-semibold">{{ roles.total }}</span>
                         data
                     </p>
-                    <Pagination :links="permissions.links" />
+                    <Pagination :links="roles.links" />
                 </div>
             </div>
         </div>

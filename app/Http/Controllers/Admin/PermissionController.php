@@ -51,19 +51,19 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate request
+        // Validate request - format: module.action
         $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
                 'unique:permissions,name',
-                'regex:/^[a-z]+(-[a-z]+)*$/', // kebab-case only
+                'regex:/^[a-z]+(\.[a-z]+(-[a-z]+)*)+$/', // module.action format
             ],
         ], [
             'name.required' => 'Nama permission wajib diisi.',
             'name.unique' => 'Permission dengan nama ini sudah ada.',
-            'name.regex' => 'Nama permission harus dalam format kebab-case (huruf kecil, pisah dengan -).',
+            'name.regex' => 'Nama permission harus dalam format module.action (contoh: tickets.create, reports.view-all).',
             'name.max' => 'Nama permission maksimal 255 karakter.',
         ]);
 
@@ -100,19 +100,19 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission)
     {
-        // Validate request
+        // Validate request - format: module.action
         $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
                 'unique:permissions,name,' . $permission->id,
-                'regex:/^[a-z]+(-[a-z]+)*$/',
+                'regex:/^[a-z]+(\.[a-z]+(-[a-z]+)*)+$/',
             ],
         ], [
             'name.required' => 'Nama permission wajib diisi.',
             'name.unique' => 'Permission dengan nama ini sudah ada.',
-            'name.regex' => 'Nama permission harus dalam format kebab-case (huruf kecil, pisah dengan -).',
+            'name.regex' => 'Nama permission harus dalam format module.action (contoh: tickets.create, reports.view-all).',
             'name.max' => 'Nama permission maksimal 255 karakter.',
         ]);
 
@@ -136,11 +136,20 @@ class PermissionController extends Controller
     {
         // Prevent deletion of system critical permissions
         $protectedPermissions = [
-            'manage-roles',
-            'manage-permissions',
-            'manage-users',
-            'view-system-logs',
-            'system-config',
+            'roles.index',
+            'roles.create',
+            'roles.edit',
+            'roles.delete',
+            'permissions.index',
+            'permissions.create',
+            'permissions.edit',
+            'permissions.delete',
+            'users.index',
+            'users.create',
+            'users.edit',
+            'users.delete',
+            'system.logs',
+            'system.config',
         ];
 
         if (in_array($permission->name, $protectedPermissions)) {

@@ -26,7 +26,7 @@ import {
 
 /**
  * Menu items configuration - TickTrack Helpdesk
- * Struktur yang lebih ringkas agar tidak terlalu panjang ke samping
+ * Naming Convention: module.action
  */
 export const menuItems = [
     {
@@ -39,126 +39,126 @@ export const menuItems = [
     {
         name: "Tiket",
         icon: Ticket,
-        permissions: ['create-ticket', 'view-own-ticket', 'triage-ticket', 'view-all-ticket'],
+        permissions: ['tickets.create', 'tickets.view-own', 'tickets.triage', 'tickets.view-all'],
         dropdown: [
             {
                 name: "Semua Tiket",
                 href: "/admin/tickets",
                 icon: Database,
                 description: "Database seluruh tiket sistem",
-                permissions: ['view-all-ticket']
+                permissions: ['tickets.view-all']
             },
             {
                 name: "Buat Tiket",
                 href: "/admin/tickets/create",
                 icon: PlusCircle,
                 description: "Laporkan kendala IT baru",
-                permissions: ['create-ticket']
+                permissions: ['tickets.create']
             },
             {
                 name: "Tiket Saya",
                 href: "/admin/tickets/my-tickets",
                 icon: List,
                 description: "Daftar laporan yang Anda buat",
-                permissions: ['view-own-ticket']
+                permissions: ['tickets.view-own']
             },
             {
                 name: "Perlu Triage",
                 href: "/admin/tickets/triage",
                 icon: AlertCircle,
                 description: "Verifikasi tiket oleh Helpdesk",
-                permissions: ['triage-ticket']
+                permissions: ['tickets.triage']
             },
         ],
     },
     {
         name: "Master Data",
         icon: Database,
-        permissions: ['manage-users', 'manage-units', 'manage-categories', 'manage-priorities'],
+        permissions: ['users.index', 'units.index', 'categories.index', 'priorities.index'],
         dropdown: [
             {
                 name: "User",
                 href: "/admin/users",
                 icon: Users,
                 description: "Manajemen data pengguna sistem",
-                permissions: ['manage-users']
+                permissions: ['users.index']
             },
             {
                 name: "Unit Kerja",
                 href: "/admin/units",
                 icon: Building2,
                 description: "Kelola struktur organisasi",
-                permissions: ['manage-units']
+                permissions: ['units.index']
             },
             {
                 name: "Kategori",
                 href: "/admin/categories",
                 icon: Tags,
                 description: "Klasifikasi kategori kendala TI",
-                permissions: ['manage-categories']
+                permissions: ['categories.index']
             },
             {
                 name: "Prioritas",
                 href: "/admin/priorities",
                 icon: Shield,
                 description: "Atur skala urgensi & SLA tiket",
-                permissions: ['manage-priorities']
+                permissions: ['priorities.index']
             },
         ],
     },
     {
         name: "Laporan",
         icon: BarChart3,
-        permissions: ['view-reports', 'approve-request', 'request-approval'],
+        permissions: ['reports.view', 'approvals.approve', 'approvals.request'],
         dropdown: [
             {
                 name: "Laporan Tiket",
                 href: "/admin/reports",
                 icon: FileText,
                 description: "Analisis data dan ekspor laporan",
-                permissions: ['view-reports']
+                permissions: ['reports.view']
             },
             {
                 name: "Approval",
                 href: "/admin/approvals",
                 icon: CheckSquare,
                 description: "Persetujuan permintaan khusus IT",
-                permissions: ['approve-request', 'request-approval']
+                permissions: ['approvals.approve', 'approvals.request']
             },
         ],
     },
     {
         name: "Pengaturan",
         icon: Settings,
-        permissions: ['manage-roles', 'manage-permissions', 'system-config', 'view-system-logs'],
+        permissions: ['roles.index', 'permissions.index', 'system.config', 'system.logs'],
         dropdown: [
             {
                 name: "Roles",
                 href: "/admin/roles",
                 icon: Shield,
                 description: "Hak akses kelompok pengguna",
-                permissions: ['manage-roles']
+                permissions: ['roles.index']
             },
             {
                 name: "Permissions",
                 href: "/admin/permissions",
                 icon: Key,
                 description: "Daftar izin fitur aplikasi",
-                permissions: ['manage-permissions']
+                permissions: ['permissions.index']
             },
             {
                 name: "Konfigurasi Sistem",
                 href: "/admin/settings",
                 icon: Settings,
                 description: "Konfigurasi global aplikasi",
-                permissions: ['system-config']
+                permissions: ['system.config']
             },
             {
                 name: "Log Aktivitas",
                 href: "/admin/logs",
                 icon: Activity,
                 description: "Audit trail aktivitas sistem",
-                permissions: ['view-system-logs']
+                permissions: ['system.logs']
             },
         ],
     },

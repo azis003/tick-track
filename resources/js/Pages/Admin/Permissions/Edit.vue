@@ -89,7 +89,7 @@ const submit = () => {
                             id="name"
                             type="text"
                             v-model="form.name"
-                            placeholder="contoh: export-reports"
+                            placeholder="contoh: reports.export"
                             class="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition-all duration-200 font-mono"
                             :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': form.errors.name }"
                         />
@@ -98,7 +98,7 @@ const submit = () => {
                             {{ form.errors.name }}
                         </p>
                         <p v-else class="mt-2 text-sm text-gray-500">
-                            💡 Gunakan format <strong>kebab-case</strong> (huruf kecil, pisah dengan tanda -)
+                            💡 Gunakan format <strong>module.action</strong> (contoh: tickets.create, reports.view)
                         </p>
                     </div>
 

@@ -11,49 +11,90 @@ class RoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * 
+     * Naming Convention: module.action
+     * Format: {module}.{action}
+     * Example: tickets.create, tickets.view-own, approvals.approve
      */
     public function run(): void
     {
-        //1. reset cached permissions
+        //1. Reset cached permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        //2. Define Permissions
+        //2. Define Permissions dengan format module.action
         $permissions = [
-            // Tickets
-            'create-ticket',
-            'view-own-ticket',
-            'view-unit-ticket',
-            'view-all-ticket',
-            'triage-ticket',
-            'assign-ticket',
-            'work-ticket',
-            'resolve-ticket',
-            'close-ticket',
-            'reopen-ticket',
-            'return-ticket',
-            // Comments & Attachments
-            'add-comment',
-            'add-attachment',
-            // Approvals
-            'request-approval',
-            'approve-request',
-            //Dashboard & Reports
-            'view-dashboard',
-            'view-reports',
-            'export-reports',
-            //Master Data
-            'manage-users',
-            'manage-units',
-            'manage-categories',
-            'manage-priorities',
-            //System (super admin)
-            'manage-roles',
-            'manage-permissions',
-            'view-system-logs',
-            'system-config',
+            // Tickets Module
+            'tickets.create',
+            'tickets.view-own',
+            'tickets.view-unit',
+            'tickets.view-all',
+            'tickets.triage',
+            'tickets.assign',
+            'tickets.work',
+            'tickets.resolve',
+            'tickets.close',
+            'tickets.reopen',
+            'tickets.return',
+
+            // Comments Module
+            'comments.create',
+
+            // Attachments Module
+            'attachments.create',
+
+            // Approvals Module
+            'approvals.request',
+            'approvals.approve',
+
+            // Dashboard Module
+            'dashboard.view',
+
+            // Reports Module
+            'reports.view',
+            'reports.export',
+
+            // Users Module (Master Data)
+            'users.index',
+            'users.create',
+            'users.edit',
+            'users.delete',
+
+            // Units Module (Master Data)
+            'units.index',
+            'units.create',
+            'units.edit',
+            'units.delete',
+
+            // Categories Module (Master Data)
+            'categories.index',
+            'categories.create',
+            'categories.edit',
+            'categories.delete',
+
+            // Priorities Module (Master Data)
+            'priorities.index',
+            'priorities.create',
+            'priorities.edit',
+            'priorities.delete',
+
+            // Roles Module (System)
+            'roles.index',
+            'roles.create',
+            'roles.edit',
+            'roles.delete',
+
+            // Permissions Module (System)
+            'permissions.index',
+            'permissions.create',
+            'permissions.edit',
+            'permissions.delete',
+
+            // System Module
+            'system.logs',
+            'system.config',
         ];
 
-        //3. create permissions
+        //3. Create permissions
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
@@ -67,67 +108,66 @@ class RoleSeeder extends Seeder
         //B. Pegawai
         $pegawai = Role::create(['name' => 'pegawai']);
         $pegawai->givePermissionTo([
-            'create-ticket',
-            'view-own-ticket',
-            'close-ticket',
-            'reopen-ticket',
-            'add-comment',
-            'add-attachment',
-            'view-dashboard',
+            'tickets.create',
+            'tickets.view-own',
+            'tickets.close',
+            'tickets.reopen',
+            'comments.create',
+            'attachments.create',
+            'dashboard.view',
         ]);
 
         //C. Ketua Tim
         $ketuaTim = Role::create(['name' => 'ketua_tim']);
         $ketuaTim->givePermissionTo([
-            'create-ticket',
-            'view-own-ticket',
-            'view-unit-ticket',
-            'add-comment',
-            'view-dashboard',
-            'view-reports',
+            'tickets.create',
+            'tickets.view-own',
+            'tickets.view-unit',
+            'comments.create',
+            'dashboard.view',
+            'reports.view',
         ]);
 
         //D. Helpdesk
         $helpdesk = Role::create(['name' => 'helpdesk']);
         $helpdesk->givePermissionTo([
-            'create-ticket',
-            'view-own-ticket',
-            'view-all-ticket',
-            'triage-ticket',
-            'assign-ticket',
-            'close-ticket',
-            'add-comment',
-            'add-attachment',
-            'view-dashboard',
-            'view-reports',
-            'request-approval',
+            'tickets.create',
+            'tickets.view-own',
+            'tickets.view-all',
+            'tickets.triage',
+            'tickets.assign',
+            'tickets.close',
+            'comments.create',
+            'attachments.create',
+            'approvals.request',
+            'dashboard.view',
+            'reports.view',
         ]);
 
         //E. Teknisi
         $teknisi = Role::create(['name' => 'teknisi']);
         $teknisi->givePermissionTo([
-            'view-own-ticket',
-            'view-all-ticket',
-            'work-ticket',
-            'resolve-ticket',
-            'return-ticket',
-            'add-comment',
-            'add-attachment',
-            'request-approval',
-            'view-dashboard',
+            'tickets.view-own',
+            'tickets.view-all',
+            'tickets.work',
+            'tickets.resolve',
+            'tickets.return',
+            'comments.create',
+            'attachments.create',
+            'approvals.request',
+            'dashboard.view',
         ]);
 
         //F. Manager
         $manager = Role::create(['name' => 'manager']);
         $manager->givePermissionTo([
-            'view-own-ticket',
-            'view-all-ticket',
-            'approve-request',
-            'add-comment',
-            'view-dashboard',
-            'view-reports',
-            'export-reports',
+            'tickets.view-own',
+            'tickets.view-all',
+            'approvals.approve',
+            'comments.create',
+            'dashboard.view',
+            'reports.view',
+            'reports.export',
         ]);
-
     }
 }
