@@ -25,10 +25,18 @@ class Priority extends Model
     ];
 
     /**
-     * Semua tiket dengan prioritas ini
+     * Tiket yang menggunakan priority ini sebagai user priority
      */
-    public function tickets(): HasMany
+    public function userPriorityTickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'user_priority_id');
+    }
+
+    /**
+     * Tiket yang menggunakan priority ini sebagai final priority
+     */
+    public function finalPriorityTickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'final_priority_id');
     }
 }

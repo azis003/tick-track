@@ -106,4 +106,18 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             'update' => 'admin.categories.update',
             'destroy' => 'admin.categories.destroy',
         ]);
+
+    // ==============================================
+    // MASTER DATA - Priorities CRUD
+    // ==============================================
+    Route::resource('priorities', App\Http\Controllers\Admin\PriorityController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'admin.priorities.index',
+            'create' => 'admin.priorities.create',
+            'store' => 'admin.priorities.store',
+            'edit' => 'admin.priorities.edit',
+            'update' => 'admin.priorities.update',
+            'destroy' => 'admin.priorities.destroy',
+        ]);
 });
