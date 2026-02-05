@@ -24,7 +24,10 @@ class UnitSeeder extends Seeder
         ];
 
         foreach ($units as $unit) {
-            Unit::create($unit);
+            Unit::firstOrCreate(
+                ['name' => $unit['name']], // cek berdasarkan nama
+                $unit // jika tidak ada, baru create
+            );
         }
     }
 }

@@ -38,6 +38,21 @@ class LoginController extends Controller
         // attempt to login
         if (auth()->attempt($credentials)) {
 
+            // Cek apakah user aktif
+            if (!auth()->user()->is_active) {
+                // Logout immediately
+                auth()->logout();
+
+                // Invalidate session
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                // Redirect back with error
+                return back()->withErrors([
+                    'email' => 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator.',
+                ])->withInput($request->only('email'));
+            }
+
             // regenerate session
             $request->session()->regenerate();
 
