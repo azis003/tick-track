@@ -92,4 +92,18 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             'update' => 'admin.units.update',
             'destroy' => 'admin.units.destroy',
         ]);
+
+    // ==============================================
+    // MASTER DATA - Categories CRUD
+    // ==============================================
+    Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'admin.categories.index',
+            'create' => 'admin.categories.create',
+            'store' => 'admin.categories.store',
+            'edit' => 'admin.categories.edit',
+            'update' => 'admin.categories.update',
+            'destroy' => 'admin.categories.destroy',
+        ]);
 });
