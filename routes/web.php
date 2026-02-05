@@ -78,4 +78,18 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             'update' => 'admin.users.update',
             'destroy' => 'admin.users.destroy',
         ]);
+
+    // ==============================================
+    // MASTER DATA - Units CRUD
+    // ==============================================
+    Route::resource('units', App\Http\Controllers\Admin\UnitController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'admin.units.index',
+            'create' => 'admin.units.create',
+            'store' => 'admin.units.store',
+            'edit' => 'admin.units.edit',
+            'update' => 'admin.units.update',
+            'destroy' => 'admin.units.destroy',
+        ]);
 });

@@ -67,7 +67,7 @@ class UserController extends Controller implements HasMiddleware
     {
         return inertia('Admin/Users/Create', [
             'roles' => Role::select('id', 'name')->orderBy('name')->get(),
-            'units' => Unit::select('id', 'name')->orderBy('name')->get(),
+            'units' => Unit::select('id', 'name')->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -132,7 +132,7 @@ class UserController extends Controller implements HasMiddleware
         return inertia('Admin/Users/Edit', [
             'user' => $user,
             'roles' => Role::select('id', 'name')->orderBy('name')->get(),
-            'units' => Unit::select('id', 'name')->orderBy('name')->get(),
+            'units' => Unit::select('id', 'name')->where('is_active', true)->orderBy('name')->get(),
             'userRoles' => $user->roles->pluck('id')->toArray(),
         ]);
     }
