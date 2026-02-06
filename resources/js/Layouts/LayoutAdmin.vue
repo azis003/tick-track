@@ -203,7 +203,7 @@ onBeforeUnmount(() => {
         <footer class="py-6 mt-auto border-t border-gray-200 bg-white">
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <p class="text-center text-sm text-gray-500">
-                    &copy; {{ new Date().getFullYear() }} <span class="font-bold">TickTrack</span> - Helpdesk BP2 Komdigi
+                    &copy; {{ new Date().getFullYear() }} Balai Besar Pengujian Perangkat Telekomunikasi dan Digital (BP2KOMDIGI) - <span class="font-bold">KOMDIGI</span>
                 </p>
             </div>
         </footer>

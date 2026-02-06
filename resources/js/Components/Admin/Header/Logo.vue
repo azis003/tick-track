@@ -23,10 +23,10 @@ const { app } = usePage().props;
             <!-- App Name & Tagline -->
             <div class="ml-3">
                 <h1 class="text-base font-bold text-gray-900 leading-tight">
-                    IDTH
+                    BP2KOMDIGI
                 </h1>
                 <p class="text-xs text-gray-500 font-medium mt-0.5">
-                    Indonesia Digital Test House
+                    Sistem Helpdesk Ticketing
                 </p>
             </div>
         </div>
