@@ -49,13 +49,6 @@ export const menuItems = [
                 permissions: ['tickets.view-all']
             },
             {
-                name: "Buat Tiket",
-                href: "/admin/tickets/create",
-                icon: PlusCircle,
-                description: "Laporkan kendala IT baru",
-                permissions: ['tickets.create']
-            },
-            {
                 name: "Tiket Saya",
                 href: "/admin/tickets/my-tickets",
                 icon: List,

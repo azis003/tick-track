@@ -20,4 +20,8 @@ createInertiaApp({
             .use(plugin)
             .mount(el);
     },
+    progress: {
+        color: '#2563eb', // Blue-600
+        showSpinner: true,
+    },
 });

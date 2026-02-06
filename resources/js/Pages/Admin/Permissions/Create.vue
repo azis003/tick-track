@@ -37,7 +37,7 @@ const submit = () => {
         </div>
 
         <!-- Form Card -->
-        <div class="max-w-2xl">
+        <div class="max-w-5xl mx-auto">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Card Header -->
                 <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">

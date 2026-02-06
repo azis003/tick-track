@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\Admin\TicketAttachmentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -120,4 +122,22 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             'update' => 'admin.priorities.update',
             'destroy' => 'admin.priorities.destroy',
         ]);
+
+    // ==============================================
+    // TICKETS CRUD
+    // ==============================================
+    Route::prefix('tickets')->group(function () {
+        Route::get('/', [TicketController::class, 'index'])->name('admin.tickets.index');
+        Route::get('/my-tickets', [TicketController::class, 'myTickets'])->name('admin.tickets.my-tickets');
+        Route::get('/unit', [TicketController::class, 'unitTickets'])->name('admin.tickets.unit');
+        Route::get('/create', [TicketController::class, 'create'])->name('admin.tickets.create');
+        Route::post('/', [TicketController::class, 'store'])->name('admin.tickets.store');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('admin.tickets.show');
+    });
+
+    // ==============================================
+    // ATTACHMENTS
+    // ==============================================
+    Route::get('/attachments/{attachment}/download', [TicketAttachmentController::class, 'download'])
+        ->name('admin.attachments.download');
 });

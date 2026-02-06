@@ -12,7 +12,14 @@ import MobileMenu from '@/Components/Admin/Header/MobileMenu.vue'
 import UserDropdown from '@/Components/Admin/Header/UserDropdown.vue'
 
 // import icons dari lucide vue
-import { Menu, X } from 'lucide-vue-next'
+import { Menu, X, Loader2 } from 'lucide-vue-next'
+
+// state loading
+const isProcessing = ref(false)
+
+// Handle global loading state
+router.on('start', () => (isProcessing.value = true))
+router.on('finish', () => (isProcessing.value = false))
 
 // import Sweet Alert
 import Swal from 'sweetalert2'
@@ -129,6 +136,26 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="flex flex-col min-h-screen bg-slate-100">
+        <!-- Global Loading Overlay -->
+        <transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div v-if="isProcessing" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
+                <div class="flex flex-col items-center">
+                    <div class="relative">
+                        <div class="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                        <Loader2 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-blue-600 animate-pulse" />
+                    </div>
+                    <p class="mt-4 text-sm font-bold text-gray-700 tracking-wider">SEDANG MEMPROSES...</p>
+                </div>
+            </div>
+        </transition>
+
         <!-- Top Navigation Bar -->
         <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
             <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
