@@ -10,6 +10,7 @@ import Logo from '@/Components/Admin/Header/Logo.vue'
 import DesktopMenu from '@/Components/Admin/Header/DesktopMenu.vue'
 import MobileMenu from '@/Components/Admin/Header/MobileMenu.vue'
 import UserDropdown from '@/Components/Admin/Header/UserDropdown.vue'
+import LoadingLogo from '@/Components/LoadingLogo.vue'
 
 // import icons dari lucide vue
 import { Menu, X, Loader2 } from 'lucide-vue-next'
@@ -138,20 +139,22 @@ onBeforeUnmount(() => {
     <div class="flex flex-col min-h-screen bg-slate-100">
         <!-- Global Loading Overlay -->
         <transition
-            enter-active-class="transition ease-out duration-200"
+            enter-active-class="transition ease-out duration-300"
             enter-from-class="opacity-0"
             enter-to-class="opacity-100"
-            leave-active-class="transition ease-in duration-200"
+            leave-active-class="transition ease-in duration-300"
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div v-if="isProcessing" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
+            <div v-if="isProcessing" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-500/10 backdrop-blur-[2px]">
                 <div class="flex flex-col items-center">
-                    <div class="relative">
-                        <div class="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
-                        <Loader2 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-blue-600 animate-pulse" />
+                    <LoadingLogo />
+                    <p class="mt-6 text-sm font-black text-blue-900 tracking-[0.3em] drop-shadow-sm animate-pulse">MEMPROSES</p>
+                    <div class="mt-2 flex space-x-1.5">
+                        <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s] shadow-sm"></div>
+                        <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s] shadow-sm"></div>
+                        <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce shadow-sm"></div>
                     </div>
-                    <p class="mt-4 text-sm font-bold text-gray-700 tracking-wider">SEDANG MEMPROSES...</p>
                 </div>
             </div>
         </transition>
