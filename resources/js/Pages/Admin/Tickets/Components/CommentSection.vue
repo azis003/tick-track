@@ -1,0 +1,324 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { useForm, usePage } from '@inertiajs/vue3'
+import { 
+    MessageSquare, 
+    Send, 
+    Edit2, 
+    Trash2, 
+    Paperclip,
+    Lock,
+    X,
+    User
+} from 'lucide-vue-next'
+
+/**
+ * CommentSection Component
+ * Section untuk menampilkan dan menambah komentar pada tiket
+ */
+const props = defineProps({
+    ticket: {
+        type: Object,
+        required: true
+    },
+    comments: {
+        type: Array,
+        default: () => []
+    }
+})
+
+const page = usePage()
+const auth = page.props.auth
+
+// Form state
+const commentForm = useForm({
+    content: '',
+    is_internal: false,
+    attachments: []
+})
+
+const editingCommentId = ref(null)
+const editForm = useForm({
+    content: ''
+})
+
+// Methods
+const submitComment = () => {
+    commentForm.post(`/admin/tickets/${props.ticket.id}/comments`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            commentForm.reset()
+        }
+    })
+}
+
+const startEdit = (comment) => {
+    editingCommentId.value = comment.id
+    editForm.content = comment.content
+}
+
+const cancelEdit = () => {
+    editingCommentId.value = null
+    editForm.reset()
+}
+
+const submitEdit = (commentId) => {
+    editForm.put(`/admin/comments/${commentId}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            editingCommentId.value = null
+            editForm.reset()
+        }
+    })
+}
+
+const deleteComment = (commentId) => {
+    if (confirm('Hapus komentar ini?')) {
+        useForm({}).delete(`/admin/comments/${commentId}`, {
+            preserveScroll: true
+        })
+    }
+}
+
+const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    })
+}
+
+const isOwner = (comment) => {
+    return comment.user_id == auth?.user?.id
+}
+
+const canViewInternal = () => {
+    const permissions = auth?.permissions || {}
+    return permissions['tickets.view-all'] || permissions['tickets.work']
+}
+
+// Check if user can add comment based on ticket status and role
+const canComment = computed(() => {
+    // No one can comment if closed or resolved
+    if (props.ticket.status === 'closed' || props.ticket.status === 'resolved') {
+        return false
+    }
+    
+    // Staff (technician/helpdesk) can always comment unless closed/resolved
+    const isStaff = canViewInternal()
+    if (isStaff) return true
+
+    // Reporter can only comment on specific statuses (new, pending_user, reopened)
+    const allowedReporterStatuses = ['new', 'pending_user', 'reopened']
+    const isReporter = props.ticket.reporter_id == auth?.user?.id
+    
+    if (isReporter) {
+        return allowedReporterStatuses.includes(props.ticket.status)
+    }
+
+    return false
+})
+
+const handleFileUpload = (event) => {
+    const files = Array.from(event.target.files)
+    commentForm.attachments = files
+}
+</script>
+
+<template>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-slate-50">
+            <div class="flex items-center gap-2">
+                <div class="p-1.5 bg-gray-100 rounded-lg">
+                    <MessageSquare class="w-4 h-4 text-gray-600" />
+                </div>
+                <h3 class="font-medium text-gray-900">Komentar</h3>
+                <span class="text-sm text-gray-500">({{ comments.length }})</span>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Add Comment Form -->
+            <form v-if="canComment" @submit.prevent="submitComment" class="space-y-3">
+                <div>
+                    <textarea
+                        v-model="commentForm.content"
+                        rows="3"
+                        placeholder="Tulis komentar..."
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                    ></textarea>
+                    <p v-if="commentForm.errors.content" class="mt-1 text-sm text-red-600">
+                        {{ commentForm.errors.content }}
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <!-- File attachment -->
+                        <label class="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">
+                            <Paperclip class="w-4 h-4" />
+                            <span>Lampirkan file</span>
+                            <input
+                                type="file"
+                                multiple
+                                @change="handleFileUpload"
+                                class="hidden"
+                                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.zip"
+                            />
+                        </label>
+                        
+                        <!-- Internal comment toggle (for staff only) -->
+                        <label v-if="canViewInternal()" class="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="commentForm.is_internal"
+                                class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                            />
+                            <Lock class="w-4 h-4" />
+                            <span>Internal</span>
+                        </label>
+                    </div>
+
+                    <button
+                        type="submit"
+                        :disabled="commentForm.processing || !commentForm.content.trim()"
+                        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    >
+                        <Send class="w-4 h-4" />
+                        <span>{{ commentForm.processing ? 'Mengirim...' : 'Kirim' }}</span>
+                    </button>
+                </div>
+
+                <!-- Attached files preview -->
+                <div v-if="commentForm.attachments.length > 0" class="flex flex-wrap gap-2">
+                    <div v-for="(file, index) in commentForm.attachments" :key="index" 
+                         class="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
+                        <Paperclip class="w-3 h-3" />
+                        <span>{{ file.name }}</span>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Comment Disabled Message -->
+            <div v-else class="p-4 bg-gray-50 border border-gray-100 rounded-lg flex items-center gap-3">
+                <div class="p-2 bg-gray-200 rounded-lg">
+                    <Lock class="w-4 h-4 text-gray-500" />
+                </div>
+                <div>
+                    <p v-if="ticket.status === 'closed'" class="text-sm font-medium text-gray-600">
+                        Tiket telah ditutup. Komentar tidak lagi diperbolehkan.
+                    </p>
+                    <p v-else-if="ticket.status === 'resolved'" class="text-sm font-medium text-gray-600">
+                        Tiket sudah selesai. Selesaikan konfirmasi atau buka kembali jika masalah masih ada.
+                    </p>
+                    <p v-else class="text-sm font-medium text-gray-600">
+                        Komentar hanya tersedia saat tiket dikembalikan teknisi (Pending User).
+                    </p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        {{ (ticket.status === 'closed' || ticket.status === 'resolved') ? 'History percakapan tetap tersimpan untuk audit.' : 'Hubungi helpdesk jika ada kendala mendesak.' }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Comments List -->
+            <div v-if="comments.length > 0" class="space-y-4 pt-4 border-t">
+                <div 
+                    v-for="comment in comments" 
+                    :key="comment.id"
+                    :class="[
+                        'p-4 rounded-lg',
+                        comment.is_internal ? 'bg-orange-50 border border-orange-100' : 'bg-gray-50'
+                    ]"
+                >
+                    <!-- Skip internal comments for users without permission -->
+                    <template v-if="!comment.is_internal || canViewInternal()">
+                        <!-- Comment Header -->
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                    <User class="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm text-gray-900">{{ comment.user?.name || 'Unknown' }}</p>
+                                    <p class="text-xs text-gray-500">{{ formatDate(comment.created_at) }}</p>
+                                </div>
+                                <span v-if="comment.is_internal" 
+                                      class="flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">
+                                    <Lock class="w-3 h-3" />
+                                    Internal
+                                </span>
+                            </div>
+
+                            <!-- Actions (owner only & ticket not closed/resolved) -->
+                            <div v-if="isOwner(comment) && editingCommentId !== comment.id && canComment" class="flex items-center gap-1">
+                                <button 
+                                    @click="startEdit(comment)"
+                                    class="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                    title="Edit"
+                                >
+                                    <Edit2 class="w-4 h-4" />
+                                </button>
+                                <button 
+                                    @click="deleteComment(comment.id)"
+                                    class="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                    title="Hapus"
+                                >
+                                    <Trash2 class="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Comment Content -->
+                        <div v-if="editingCommentId === comment.id" class="mt-2">
+                            <textarea
+                                v-model="editForm.content"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            ></textarea>
+                            <div class="flex justify-end gap-2 mt-2">
+                                <button 
+                                    @click="cancelEdit"
+                                    class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                                >
+                                    Batal
+                                </button>
+                                <button 
+                                    @click="submitEdit(comment.id)"
+                                    :disabled="editForm.processing"
+                                    class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                    Simpan
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else class="text-sm text-gray-700 whitespace-pre-wrap">
+                            {{ comment.content }}
+                        </div>
+
+                        <!-- Comment Attachments -->
+                        <div v-if="comment.attachments && comment.attachments.length > 0" class="mt-3 flex flex-wrap gap-2">
+                            <a 
+                                v-for="attachment in comment.attachments" 
+                                :key="attachment.id"
+                                :href="`/admin/attachments/${attachment.id}/download`"
+                                class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded text-xs text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                            >
+                                <Paperclip class="w-3 h-3" />
+                                <span>{{ attachment.file_name }}</span>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="text-center py-8">
+                <MessageSquare class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p class="text-gray-500">Belum ada komentar</p>
+            </div>
+        </div>
+    </div>
+</template>

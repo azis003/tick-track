@@ -32,7 +32,7 @@ const getStatusClass = (status) => {
         'new': 'bg-indigo-100 text-indigo-700',
         'in_progress': 'bg-blue-100 text-blue-700',
         'pending_user': 'bg-orange-100 text-orange-700',
-        'pending_vendor': 'bg-orange-100 text-orange-700',
+        'pending_external': 'bg-orange-100 text-orange-700',
         'resolved': 'bg-green-100 text-green-700',
         'closed': 'bg-gray-100 text-gray-700',
     };

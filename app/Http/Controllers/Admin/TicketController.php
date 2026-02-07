@@ -9,6 +9,12 @@ use App\Models\User;
 use App\Services\TicketService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTicketRequest;
+use App\Http\Requests\TriageTicketRequest;
+use App\Http\Requests\AssignTicketRequest;
+use App\Http\Requests\ReturnTicketRequest;
+use App\Http\Requests\SetPendingRequest;
+use App\Http\Requests\ResolveTicketRequest;
+use App\Http\Requests\RequestApprovalRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -29,12 +35,30 @@ class TicketController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
+            // Phase 1: View & Create
             new Middleware('permission:tickets.view-all', only: ['index']),
             new Middleware('permission:tickets.view-own', only: ['myTickets', 'show']),
             new Middleware('permission:tickets.view-unit', only: ['unitTickets']),
             new Middleware('permission:tickets.create', only: ['create', 'store']),
+            // Phase 2: Triage & Assignment
+            new Middleware('permission:tickets.triage', only: ['triage', 'processTriage', 'selfHandle']),
+            new Middleware('permission:tickets.assign', only: ['assign']),
+            new Middleware('permission:tickets.accept', only: ['accept']),
+            new Middleware('permission:tickets.return', only: ['returnTicket']),
+            new Middleware('permission:tickets.view-assigned', only: ['assignedTickets']),
+            // Phase 3: Work & Resolve
+            new Middleware('permission:tickets.work', only: ['setPending']),
+            new Middleware('permission:tickets.resolve', only: ['resolve']),
+            new Middleware('permission:approvals.request', only: ['requestApproval']),
+            // Phase 4: Close & Reopen
+            new Middleware('permission:tickets.close', only: ['close']),
+            new Middleware('permission:tickets.reopen', only: ['reopen']),
         ];
     }
+
+    // ==============================================
+    // PHASE 1: BASIC CRUD
+    // ==============================================
 
     /**
      * List semua tiket (Helpdesk, Manager, Admin)
@@ -154,6 +178,7 @@ class TicketController extends Controller implements HasMiddleware
             'assignedBy',
             'logs.user',
             'comments.user',
+            'comments.attachments',
             'attachments.user',
         ]);
 
@@ -161,10 +186,334 @@ class TicketController extends Controller implements HasMiddleware
         $ticket->status_label = $ticket->statusLabel;
         $ticket->status_color = $ticket->statusColor;
 
-        return Inertia::render('Admin/Tickets/Show', [
+        // Get additional data for triage actions
+        $data = [
             'ticket' => $ticket,
             'statuses' => Ticket::STATUS_LABELS,
             'statusColors' => Ticket::STATUS_COLORS,
+        ];
+
+        // If user can triage, include priorities and technicians
+        if ($user->can('tickets.triage')) {
+            $data['priorities'] = Priority::where('is_active', true)
+                ->orderBy('level')
+                ->get(['id', 'name', 'color']);
+            $data['technicians'] = $this->ticketService->getAvailableTechnicians();
+        }
+
+        return Inertia::render('Admin/Tickets/Show', $data);
+    }
+
+    // ==============================================
+    // PHASE 2: TRIAGE & ASSIGNMENT
+    // ==============================================
+
+    /**
+     * List tiket yang perlu triage (Helpdesk)
+     */
+    public function triage(Request $request): Response
+    {
+        $tickets = $this->ticketService->getTicketsNeedTriage(
+            $request->only(['search', 'category_id'])
+        );
+
+        return Inertia::render('Admin/Tickets/Triage', [
+            'tickets' => $tickets,
+            'filters' => $request->only(['search', 'category_id']),
+            'categories' => Category::where('is_active', true)->get(['id', 'name']),
         ]);
+    }
+
+    /**
+     * Process triage - set final priority
+     */
+    public function processTriage(TriageTicketRequest $request, Ticket $ticket): RedirectResponse
+    {
+        // Only allow triage for new or reopened tickets
+        if (!in_array($ticket->status, [Ticket::STATUS_NEW, Ticket::STATUS_REOPENED])) {
+            return back()->with('error', 'Tiket ini tidak dapat di-triage.');
+        }
+
+        $this->ticketService->triageTicket(
+            $ticket,
+            $request->final_priority_id,
+            $request->notes,
+            $request->user()
+        );
+
+        return back()->with('success', 'Tiket berhasil di-triage.');
+    }
+
+    /**
+     * Assign ticket to technician
+     */
+    public function assign(AssignTicketRequest $request, Ticket $ticket): RedirectResponse
+    {
+        // Only allow assign for triaged tickets
+        if ($ticket->status !== Ticket::STATUS_TRIAGE) {
+            return back()->with('error', 'Tiket harus di-triage terlebih dahulu sebelum ditugaskan.');
+        }
+
+        $this->ticketService->assignTicket(
+            $ticket,
+            $request->technician_id,
+            $request->user(),
+            $request->notes
+        );
+
+        return back()->with('success', 'Tiket berhasil ditugaskan ke teknisi.');
+    }
+
+    /**
+     * Self-handle by Helpdesk
+     */
+    public function selfHandle(Ticket $ticket): RedirectResponse
+    {
+        // Only allow self-handle for triaged tickets
+        if ($ticket->status !== Ticket::STATUS_TRIAGE) {
+            return back()->with('error', 'Tiket harus di-triage terlebih dahulu.');
+        }
+
+        $this->ticketService->startSelfHandle($ticket, auth()->user());
+
+        return back()->with('success', 'Anda mulai mengerjakan tiket ini.');
+    }
+
+    /**
+     * Technician accepts and starts working on ticket
+     */
+    public function accept(Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if ticket is assigned to this technician
+        if ($ticket->assigned_to_id !== $user->id) {
+            return back()->with('error', 'Tiket ini bukan ditugaskan kepada Anda.');
+        }
+
+        // Only allow accept for assigned tickets
+        if ($ticket->status !== Ticket::STATUS_ASSIGNED) {
+            return back()->with('error', 'Tiket ini tidak dalam status ditugaskan.');
+        }
+
+        $this->ticketService->acceptAndStart($ticket, $user);
+
+        return back()->with('success', 'Anda mulai mengerjakan tiket ini.');
+    }
+
+    /**
+     * Technician returns ticket to Helpdesk
+     */
+    public function returnTicket(ReturnTicketRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if ticket is assigned to this technician
+        if ($ticket->assigned_to_id !== $user->id) {
+            return back()->with('error', 'Tiket ini bukan ditugaskan kepada Anda.');
+        }
+
+        // Only allow return for assigned or in_progress tickets
+        if (!in_array($ticket->status, [Ticket::STATUS_ASSIGNED, Ticket::STATUS_IN_PROGRESS])) {
+            return back()->with('error', 'Tiket ini tidak dapat dikembalikan.');
+        }
+
+        $this->ticketService->returnToHelpdesk($ticket, $request->reason, $user);
+
+        return redirect('/admin/tickets/assigned')
+            ->with('success', 'Tiket berhasil dikembalikan ke Helpdesk.');
+    }
+
+    /**
+     * List tiket yang ditugaskan ke teknisi yang login
+     */
+    public function assignedTickets(Request $request): Response
+    {
+        $tickets = $this->ticketService->getAssignedTickets(
+            $request->user(),
+            $request->only(['search', 'status'])
+        );
+
+        return Inertia::render('Admin/Tickets/AssignedTickets', [
+            'tickets' => $tickets,
+            'filters' => $request->only(['search', 'status']),
+            'statuses' => [
+                Ticket::STATUS_ASSIGNED => Ticket::STATUS_LABELS[Ticket::STATUS_ASSIGNED],
+                Ticket::STATUS_IN_PROGRESS => Ticket::STATUS_LABELS[Ticket::STATUS_IN_PROGRESS],
+                Ticket::STATUS_PENDING_USER => Ticket::STATUS_LABELS[Ticket::STATUS_PENDING_USER],
+                Ticket::STATUS_PENDING_EXTERNAL => Ticket::STATUS_LABELS[Ticket::STATUS_PENDING_EXTERNAL],
+                Ticket::STATUS_WAITING_APPROVAL => Ticket::STATUS_LABELS[Ticket::STATUS_WAITING_APPROVAL],
+            ],
+        ]);
+    }
+
+    // ==============================================
+    // PHASE 3: WORK & RESOLVE
+    // ==============================================
+
+    /**
+     * Set ticket to pending status
+     */
+    public function setPending(SetPendingRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if ticket is assigned to this user
+        if ($ticket->assigned_to_id !== $user->id) {
+            return back()->with('error', 'Tiket ini bukan ditugaskan kepada Anda.');
+        }
+
+        // Only allow pending for in_progress tickets
+        if ($ticket->status !== Ticket::STATUS_IN_PROGRESS) {
+            return back()->with('error', 'Tiket harus dalam status "Dalam Proses" untuk di-pending.');
+        }
+
+        $this->ticketService->setPending(
+            $ticket,
+            $request->type,
+            $request->reason,
+            $user
+        );
+
+        $typeLabel = $request->type === 'user' ? 'User' : 'Vendor/Pihak Eksternal';
+        return back()->with('success', "Tiket di-pending menunggu {$typeLabel}.");
+    }
+
+    /**
+     * Resume ticket from pending status
+     */
+    public function resume(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if user has permission to resume
+        // Technician can resume any of their assigned tickets
+        // Reporter can resume their own ticket if status is pending_user
+        $canResume = ($ticket->assigned_to_id === $user->id) ||
+            ($ticket->reporter_id === $user->id && $ticket->status === Ticket::STATUS_PENDING_USER);
+
+        if (!$canResume) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk melanjutkan tiket ini.');
+        }
+
+        // Only allow resume for pending tickets
+        if (!in_array($ticket->status, [Ticket::STATUS_PENDING_USER, Ticket::STATUS_PENDING_EXTERNAL])) {
+            return back()->with('error', 'Tiket tidak dalam status pending.');
+        }
+
+        $this->ticketService->resumeFromPending(
+            $ticket,
+            $request->notes,
+            $user
+        );
+
+        return back()->with('success', 'Tiket dilanjutkan kembali.');
+    }
+
+    /**
+     * Request approval from Manager
+     */
+    public function requestApproval(RequestApprovalRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if ticket is assigned to this user
+        if ($ticket->assigned_to_id !== $user->id) {
+            return back()->with('error', 'Tiket ini bukan ditugaskan kepada Anda.');
+        }
+
+        // Only allow request approval for in_progress tickets
+        if ($ticket->status !== Ticket::STATUS_IN_PROGRESS) {
+            return back()->with('error', 'Tiket harus dalam status "Dalam Proses" untuk meminta approval.');
+        }
+
+        $this->ticketService->requestApproval(
+            $ticket,
+            $request->validated(),
+            $user
+        );
+
+        return back()->with('success', 'Permintaan approval telah dikirim ke Manager.');
+    }
+
+    /**
+     * Resolve ticket with solution
+     */
+    public function resolve(ResolveTicketRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if ticket is assigned to this user
+        if ($ticket->assigned_to_id !== $user->id) {
+            return back()->with('error', 'Tiket ini bukan ditugaskan kepada Anda.');
+        }
+
+        // Only allow resolve for specific statuses
+        $allowedStatuses = [
+            Ticket::STATUS_IN_PROGRESS,
+            Ticket::STATUS_PENDING_USER,
+            Ticket::STATUS_PENDING_EXTERNAL,
+        ];
+
+        if (!in_array($ticket->status, $allowedStatuses)) {
+            return back()->with('error', 'Tiket tidak dapat diselesaikan dari status saat ini.');
+        }
+
+        $this->ticketService->resolveTicket(
+            $ticket,
+            $request->resolution,
+            $user,
+            $request->file('evidence', [])
+        );
+
+        return back()->with('success', 'Tiket berhasil diselesaikan. Menunggu konfirmasi dari pelapor.');
+    }
+
+    /**
+     * Close ticket (Reporter confirms resolution)
+     */
+    public function close(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Only reporter can close their own ticket
+        if ($ticket->reporter_id !== $user->id) {
+            return back()->with('error', 'Hanya pelapor yang dapat menutup tiket ini.');
+        }
+
+        // Only allowed if status is resolved
+        if ($ticket->status !== Ticket::STATUS_RESOLVED) {
+            return back()->with('error', 'Tiket hanya dapat ditutup jika sudah dalam status "Selesai".');
+        }
+
+        $this->ticketService->closeTicket($ticket, $user);
+
+        return back()->with('success', 'Tiket telah berhasil ditutup. Terima kasih atas konfirmasinya.');
+    }
+
+    /**
+     * Reopen ticket (Reporter not satisfied)
+     */
+    public function reopen(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Only reporter can reopen their own ticket
+        if ($ticket->reporter_id !== $user->id) {
+            return back()->with('error', 'Hanya pelapor yang dapat membuka kembali tiket ini.');
+        }
+
+        // Only allowed if status is resolved
+        if ($ticket->status !== Ticket::STATUS_RESOLVED) {
+            return back()->with('error', 'Tiket hanya dapat dibuka kembali jika dalam status "Selesai".');
+        }
+
+        $request->validate([
+            'reason' => 'required|string|min:10|max:1000'
+        ]);
+
+        $this->ticketService->reopenTicket($ticket, $request->reason, $user);
+
+        return back()->with('success', 'Tiket telah dibuka kembali untuk diproses ulang oleh teknisi.');
     }
 }

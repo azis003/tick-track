@@ -49,7 +49,7 @@ class DashboardController extends Controller
         // Count tickets by status dengan trending
         $newCount = Ticket::where('status', 'new')->count();
         $inProgressCount = Ticket::where('status', 'in_progress')->count();
-        $pendingCount = Ticket::whereIn('status', ['pending_user', 'pending_vendor'])->count();
+        $pendingCount = Ticket::whereIn('status', ['pending_user', 'pending_external'])->count();
         $resolvedCount = Ticket::where('status', 'resolved')->count();
         $closedCount = Ticket::where('status', 'closed')->count();
 
@@ -57,7 +57,7 @@ class DashboardController extends Controller
         $oneWeekAgo = Carbon::now()->subWeek();
         $newTrend = $this->calculateTrend('new', $oneWeekAgo);
         $inProgressTrend = $this->calculateTrend('in_progress', $oneWeekAgo);
-        $pendingTrend = $this->calculateTrend(['pending_user', 'pending_vendor'], $oneWeekAgo);
+        $pendingTrend = $this->calculateTrend(['pending_user', 'pending_external'], $oneWeekAgo);
         $resolvedTrend = $this->calculateTrend('resolved', $oneWeekAgo);
         $closedTrend = $this->calculateTrend('closed', $oneWeekAgo);
 
@@ -142,11 +142,30 @@ class DashboardController extends Controller
             ->where('status', 'in_progress')
             ->count();
         $pendingCount = Ticket::where('reporter_id', $user->id)
-            ->whereIn('status', ['pending_user', 'pending_vendor'])
+            ->whereIn('status', ['pending_user', 'pending_external'])
             ->count();
         $closedCount = Ticket::where('reporter_id', $user->id)
-            ->where('status', 'closed')
+            ->whereIn('status', ['resolved', 'closed']) // Count both resolved and closed
             ->count();
+
+        // Get tickets that need user action (specifically pending_user)
+        $actionRequiredTickets = Ticket::with(['category', 'userPriority'])
+            ->where('reporter_id', $user->id)
+            ->where('status', 'pending_user')
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'ticket_number' => $ticket->ticket_number,
+                    'title' => $ticket->title,
+                    'status' => $ticket->status,
+                    'status_label' => $this->getStatusLabel($ticket->status),
+                    'pending_reason' => $ticket->pending_reason,
+                    'created_at' => $ticket->created_at->diffForHumans(),
+                    'updated_at' => $ticket->updated_at->diffForHumans(),
+                ];
+            });
 
         // Get recent tickets (limit 5)
         $recentTickets = Ticket::with(['category', 'userPriority'])
@@ -174,9 +193,11 @@ class DashboardController extends Controller
                 'pending' => $pendingCount,
                 'closed' => $closedCount,
             ],
+            'actionRequiredTickets' => $actionRequiredTickets,
             'recentTickets' => $recentTickets,
         ]);
     }
+
 
     /**
      * Dashboard Teknisi
@@ -195,23 +216,27 @@ class DashboardController extends Controller
             ->where('status', 'in_progress')
             ->count();
         $pendingCount = Ticket::where('assigned_to_id', $user->id)
-            ->whereIn('status', ['pending_user', 'pending_vendor'])
+            ->whereIn('status', ['pending_user', 'pending_external'])
             ->count();
         $resolvedCount = Ticket::where('assigned_to_id', $user->id)
             ->where('status', 'resolved')
             ->count();
 
-        // Get assigned tickets
+        // Get all active tickets (not just assigned, but also in_progress and pending)
+        // Order by status priority: assigned first, then in_progress, then pending
         $assignedTickets = Ticket::with(['reporter', 'category', 'userPriority'])
             ->where('assigned_to_id', $user->id)
-            ->where('status', 'assigned')
+            ->whereIn('status', ['assigned', 'in_progress', 'pending_user', 'pending_external', 'waiting_approval'])
+            ->orderByRaw("FIELD(status, 'assigned', 'in_progress', 'pending_user', 'pending_external', 'waiting_approval')")
             ->orderBy('created_at', 'asc')
+            ->limit(10)
             ->get()
             ->map(function ($ticket) {
                 return [
                     'id' => $ticket->id,
                     'ticket_number' => $ticket->ticket_number,
                     'title' => $ticket->title,
+                    'status' => $ticket->status,
                     'priority' => $ticket->userPriority?->name,
                     'priority_color' => $ticket->userPriority?->color,
                     'user' => $ticket->reporter?->name,
@@ -229,6 +254,7 @@ class DashboardController extends Controller
             'assignedTickets' => $assignedTickets,
         ]);
     }
+
 
     /**
      * Dashboard Manager TI
@@ -499,7 +525,7 @@ class DashboardController extends Controller
             'assigned' => 'Ditugaskan',
             'in_progress' => 'Dalam Proses',
             'pending_user' => 'Pending User',
-            'pending_vendor' => 'Pending Vendor',
+            'pending_external' => 'Pending Vendor',
             'waiting_approval' => 'Menunggu Approval',
             'resolved' => 'Selesai',
             'closed' => 'Ditutup',
