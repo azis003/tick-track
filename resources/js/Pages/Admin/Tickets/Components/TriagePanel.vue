@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import { X, AlertTriangle, CheckCircle, UserPlus, Wrench } from 'lucide-vue-next'
+import { AlertTriangle, CheckCircle, UserPlus, Wrench, Send } from 'lucide-vue-next'
 
 /**
  * TriagePanel Component
- * Panel untuk melakukan triage tiket - set final priority dan pilih aksi lanjutan
+ * Panel untuk melakukan triage tiket - set final priority dan langsung assign/self-handle
  */
 const props = defineProps({
     ticket: {
@@ -24,46 +24,38 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const showAssignModal = ref(false)
+// Action type: 'assign' or 'self_handle'
+const selectedAction = ref('assign')
+
 const triageForm = useForm({
     final_priority_id: props.ticket.user_priority_id || '',
-    notes: ''
+    notes: '',
+    action: 'assign',
+    technician_id: ''
 })
 
-const assignForm = useForm({
-    technician_id: '',
-    notes: ''
+// Sync action with form
+watch(selectedAction, (val) => {
+    triageForm.action = val
+    if (val === 'self_handle') {
+        triageForm.technician_id = ''
+    }
 })
 
-const isTriaged = computed(() => props.ticket.status === 'triage')
+const canSubmit = computed(() => {
+    if (!triageForm.final_priority_id) return false
+    if (selectedAction.value === 'assign' && !triageForm.technician_id) return false
+    return true
+})
 
 const submitTriage = () => {
     triageForm.post(`/admin/tickets/${props.ticket.id}/triage`, {
         preserveScroll: true,
         onSuccess: () => {
             triageForm.reset()
-        }
-    })
-}
-
-const submitAssign = () => {
-    assignForm.post(`/admin/tickets/${props.ticket.id}/assign`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            assignForm.reset()
-            showAssignModal.value = false
             emit('close')
         }
     })
-}
-
-const selfHandle = () => {
-    if (confirm('Anda yakin ingin mengerjakan tiket ini sendiri?')) {
-        useForm({}).post(`/admin/tickets/${props.ticket.id}/self-handle`, {
-            preserveScroll: true,
-            onSuccess: () => emit('close')
-        })
-    }
 }
 
 const getPriorityColor = (color) => {
@@ -85,179 +77,142 @@ const getPriorityColor = (color) => {
                 <div class="p-1.5 bg-purple-100 rounded-lg">
                     <AlertTriangle class="w-4 h-4 text-purple-600" />
                 </div>
-                <h3 class="font-medium text-gray-900">Panel Triage</h3>
+                <h3 class="font-medium text-gray-900">Verifikasi & Penugasan</h3>
             </div>
         </div>
 
-        <div class="p-6 space-y-6">
-            <!-- Step 1: Set Final Priority (only if not triaged yet) -->
-            <div v-if="!isTriaged">
-                <h4 class="text-sm font-medium text-gray-700 mb-3">Step 1: Tentukan Prioritas Final</h4>
-                <form @submit.prevent="submitTriage" class="space-y-4">
-                    <!-- Priority Selection -->
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-2">Prioritas Final</label>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <label
-                                v-for="priority in priorities"
-                                :key="priority.id"
-                                class="relative flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all"
-                                :class="[
-                                    triageForm.final_priority_id === priority.id 
-                                        ? `${getPriorityColor(priority.color)} border-current ring-2 ring-offset-2` 
-                                        : 'border-gray-200 hover:border-gray-300'
-                                ]"
-                            >
-                                <input
-                                    type="radio"
-                                    :value="priority.id"
-                                    v-model="triageForm.final_priority_id"
-                                    class="sr-only"
-                                />
-                                <span class="text-sm font-medium">{{ priority.name }}</span>
-                            </label>
-                        </div>
-                        <p v-if="triageForm.errors.final_priority_id" class="mt-1 text-sm text-red-600">
-                            {{ triageForm.errors.final_priority_id }}
-                        </p>
-                    </div>
-
-                    <!-- Notes -->
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-2">Catatan Triage (Opsional)</label>
-                        <textarea
-                            v-model="triageForm.notes"
-                            rows="2"
-                            placeholder="Catatan hasil verifikasi..."
-                            class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                        ></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button
-                        type="submit"
-                        :disabled="triageForm.processing || !triageForm.final_priority_id"
-                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        <form @submit.prevent="submitTriage" class="p-6 space-y-6">
+            <!-- Section 1: Final Priority -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    <span class="inline-flex items-center justify-center w-5 h-5 mr-2 text-xs font-bold text-white bg-purple-600 rounded-full">1</span>
+                    Prioritas Final
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <label
+                        v-for="priority in priorities"
+                        :key="priority.id"
+                        class="relative flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all"
+                        :class="[
+                            triageForm.final_priority_id === priority.id 
+                                ? `${getPriorityColor(priority.color)} border-current ring-2 ring-offset-2` 
+                                : 'border-gray-200 hover:border-gray-300'
+                        ]"
                     >
-                        <CheckCircle class="w-4 h-4" />
-                        <span>{{ triageForm.processing ? 'Memproses...' : 'Verifikasi Tiket' }}</span>
-                    </button>
-                </form>
+                        <input
+                            type="radio"
+                            :value="priority.id"
+                            v-model="triageForm.final_priority_id"
+                            class="sr-only"
+                        />
+                        <span class="text-sm font-medium">{{ priority.name }}</span>
+                    </label>
+                </div>
+                <p v-if="triageForm.errors.final_priority_id" class="mt-1 text-sm text-red-600">
+                    {{ triageForm.errors.final_priority_id }}
+                </p>
             </div>
 
-            <!-- Step 2: Choose Action (only if triaged) -->
-            <div v-else>
-                <h4 class="text-sm font-medium text-gray-700 mb-3">Step 2: Pilih Tindakan</h4>
+            <!-- Section 2: Action Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    <span class="inline-flex items-center justify-center w-5 h-5 mr-2 text-xs font-bold text-white bg-purple-600 rounded-full">2</span>
+                    Tindakan
+                </label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <!-- Assign to Technician -->
-                    <button
-                        @click="showAssignModal = true"
-                        class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left"
+                    <label
+                        class="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                        :class="selectedAction === 'assign' 
+                            ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/20' 
+                            : 'border-gray-200 hover:border-gray-300'"
                     >
-                        <div class="p-2 bg-indigo-100 rounded-lg">
-                            <UserPlus class="w-5 h-5 text-indigo-600" />
+                        <input
+                            type="radio"
+                            value="assign"
+                            v-model="selectedAction"
+                            class="sr-only"
+                        />
+                        <div class="p-2 rounded-lg" :class="selectedAction === 'assign' ? 'bg-indigo-100' : 'bg-gray-100'">
+                            <UserPlus class="w-5 h-5" :class="selectedAction === 'assign' ? 'text-indigo-600' : 'text-gray-500'" />
                         </div>
                         <div>
-                            <h5 class="font-medium text-gray-900">Tugaskan ke Teknisi</h5>
+                            <h5 class="font-medium" :class="selectedAction === 'assign' ? 'text-indigo-900' : 'text-gray-900'">Tugaskan ke Teknisi</h5>
                             <p class="text-sm text-gray-500">Pilih teknisi untuk menangani</p>
                         </div>
-                    </button>
+                    </label>
 
                     <!-- Self Handle -->
-                    <button
-                        @click="selfHandle"
-                        class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all text-left"
+                    <label
+                        class="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                        :class="selectedAction === 'self_handle' 
+                            ? 'border-green-500 bg-green-50 ring-2 ring-green-500/20' 
+                            : 'border-gray-200 hover:border-gray-300'"
                     >
-                        <div class="p-2 bg-green-100 rounded-lg">
-                            <Wrench class="w-5 h-5 text-green-600" />
+                        <input
+                            type="radio"
+                            value="self_handle"
+                            v-model="selectedAction"
+                            class="sr-only"
+                        />
+                        <div class="p-2 rounded-lg" :class="selectedAction === 'self_handle' ? 'bg-green-100' : 'bg-gray-100'">
+                            <Wrench class="w-5 h-5" :class="selectedAction === 'self_handle' ? 'text-green-600' : 'text-gray-500'" />
                         </div>
                         <div>
-                            <h5 class="font-medium text-gray-900">Tangani Sendiri</h5>
+                            <h5 class="font-medium" :class="selectedAction === 'self_handle' ? 'text-green-900' : 'text-gray-900'">Tangani Sendiri</h5>
                             <p class="text-sm text-gray-500">Kerjakan langsung sebagai Helpdesk</p>
                         </div>
-                    </button>
+                    </label>
                 </div>
             </div>
-        </div>
 
-        <!-- Assign Modal -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="duration-200 ease-out"
-                enter-from-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-active-class="duration-150 ease-in"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
+            <!-- Section 3: Technician Selection (only if assign) -->
+            <div v-if="selectedAction === 'assign'">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    <span class="inline-flex items-center justify-center w-5 h-5 mr-2 text-xs font-bold text-white bg-purple-600 rounded-full">3</span>
+                    Pilih Teknisi
+                </label>
+                <select
+                    v-model="triageForm.technician_id"
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                >
+                    <option value="">-- Pilih Teknisi --</option>
+                    <option 
+                        v-for="tech in technicians" 
+                        :key="tech.id" 
+                        :value="tech.id"
+                    >
+                        {{ tech.name }} ({{ tech.assigned_tickets_count || 0 }} tiket aktif)
+                    </option>
+                </select>
+                <p v-if="triageForm.errors.technician_id" class="mt-1 text-sm text-red-600">
+                    {{ triageForm.errors.technician_id }}
+                </p>
+            </div>
+
+            <!-- Section 4: Notes -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
+                <textarea
+                    v-model="triageForm.notes"
+                    rows="2"
+                    placeholder="Catatan untuk teknisi atau hasil verifikasi..."
+                    class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                ></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                :disabled="triageForm.processing || !canSubmit"
+                class="w-full flex items-center justify-center gap-2 px-4 py-3 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                :class="selectedAction === 'assign' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-green-600 hover:bg-green-700'"
             >
-                <div v-if="showAssignModal" class="fixed inset-0 z-50 overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4">
-                        <div class="fixed inset-0 bg-black/50" @click="showAssignModal = false"></div>
-                        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all">
-                            <!-- Header -->
-                            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                                <h3 class="text-lg font-semibold text-gray-900">Tugaskan ke Teknisi</h3>
-                                <button @click="showAssignModal = false" class="p-1 rounded hover:bg-gray-100">
-                                    <X class="w-5 h-5 text-gray-500" />
-                                </button>
-                            </div>
-
-                            <!-- Body -->
-                            <form @submit.prevent="submitAssign" class="p-6 space-y-4">
-                                <!-- Technician Select -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Teknisi</label>
-                                    <select
-                                        v-model="assignForm.technician_id"
-                                        class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                                    >
-                                        <option value="">-- Pilih Teknisi --</option>
-                                        <option 
-                                            v-for="tech in technicians" 
-                                            :key="tech.id" 
-                                            :value="tech.id"
-                                        >
-                                            {{ tech.name }} ({{ tech.assigned_tickets_count || 0 }} tiket aktif)
-                                        </option>
-                                    </select>
-                                    <p v-if="assignForm.errors.technician_id" class="mt-1 text-sm text-red-600">
-                                        {{ assignForm.errors.technician_id }}
-                                    </p>
-                                </div>
-
-                                <!-- Notes -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                                    <textarea
-                                        v-model="assignForm.notes"
-                                        rows="2"
-                                        placeholder="Instruksi khusus untuk teknisi..."
-                                        class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                                    ></textarea>
-                                </div>
-
-                                <!-- Actions -->
-                                <div class="flex gap-3 pt-2">
-                                    <button
-                                        type="button"
-                                        @click="showAssignModal = false"
-                                        class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        :disabled="assignForm.processing || !assignForm.technician_id"
-                                        class="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {{ assignForm.processing ? 'Memproses...' : 'Tugaskan' }}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </Transition>
-        </Teleport>
+                <Send class="w-4 h-4" />
+                <span v-if="triageForm.processing">Memproses...</span>
+                <span v-else-if="selectedAction === 'assign'">Verifikasi & Tugaskan</span>
+                <span v-else>Verifikasi & Tangani Sendiri</span>
+            </button>
+        </form>
     </div>
 </template>

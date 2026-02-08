@@ -52,15 +52,8 @@ export const menuItems = [
                 name: "Tiket Saya",
                 href: "/admin/tickets/my-tickets",
                 icon: List,
-                description: "Daftar laporan yang Anda buat",
-                permissions: ['tickets.view-own']
-            },
-            {
-                name: "Perlu Triage",
-                href: "/admin/tickets/triage",
-                icon: AlertCircle,
-                description: "Verifikasi tiket oleh Helpdesk",
-                permissions: ['tickets.triage']
+                description: "Tiket yang menjadi tanggung jawab Anda",
+                permissions: ['tickets.view-own', 'tickets.work', 'tickets.triage']
             },
         ],
     },

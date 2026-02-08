@@ -1,6 +1,6 @@
 <script setup>
-// import Link dari Inertia
-import { Link } from '@inertiajs/vue3'
+// import usePage
+import { Link, usePage } from '@inertiajs/vue3'
 
 // Props untuk menerima data menu dan fungsi kontrol
 defineProps({
@@ -17,6 +17,9 @@ defineProps({
         required: true,
     },
 });
+
+const { props } = usePage()
+const pendingCount = props.auth.pending_user_count || 0
 </script>
 
 <template>
@@ -55,8 +58,18 @@ defineProps({
 
                     <!-- Teks & Deskripsi -->
                     <div class="flex-1">
-                        <div class="font-bold text-slate-800 group-hover:text-blue-700 transition-colors duration-200 text-sm">
-                            {{ subItem.name }}
+                        <div class="flex items-center justify-between">
+                            <div class="font-bold text-slate-800 group-hover:text-blue-700 transition-colors duration-200 text-sm">
+                                {{ subItem.name }}
+                            </div>
+
+                            <!-- Badge for Tiket Saya -->
+                            <span 
+                                v-if="subItem.name === 'Tiket Saya' && pendingCount > 0"
+                                class="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm group-hover:scale-110 transition-transform"
+                            >
+                                {{ pendingCount }}
+                            </span>
                         </div>
 
                         <!-- Deskripsi -->

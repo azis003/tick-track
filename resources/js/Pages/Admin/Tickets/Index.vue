@@ -80,6 +80,7 @@ const props = defineProps({
             :statuses="statuses"
             :show-reporter="true"
             :show-assignee="true"
+            :highlight-triage-required="true"
         />
     </LayoutAdmin>
 </template>

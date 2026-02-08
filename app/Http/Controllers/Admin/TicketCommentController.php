@@ -42,28 +42,21 @@ class TicketCommentController extends Controller implements HasMiddleware
 
         $user = $request->user();
 
-        // 2. Define "dikembalikan" or "tanya yang belum jelas" policy for reporter (Pegawai)
-        // If user is the reporter and doesn't have 'view-all' (staff) permission
+        // 2. Staff (Helpdesk/Teknisi) CANNOT comment directly
+        // They should use workflow actions (Return to User, etc.) which have their own notes
         $isStaff = $user->can('tickets.view-all') || $user->can('tickets.work');
 
-        if (!$isStaff && $ticket->reporter_id === $user->id) {
-            $allowedReporterStatuses = [
-                Ticket::STATUS_NEW,
-                Ticket::STATUS_PENDING_USER,
-                Ticket::STATUS_REOPENED
-            ];
-
-            if (!in_array($ticket->status, $allowedReporterStatuses)) {
-                return back()->with('error', 'Komentar hanya diperbolehkan saat tiket dikembalikan (Pending User) atau saat baru dibuat.');
-            }
+        if ($isStaff) {
+            return back()->with('error', 'Gunakan tombol aksi (seperti "Kembalikan ke User") untuk berkomunikasi dengan pelapor.');
         }
 
-        // 3. General Access Check
-        $canComment = $isStaff
-            || $ticket->reporter_id === $user->id
-            || $ticket->created_by_id === $user->id;
-
-        if (!$canComment) {
+        // 3. Reporter (Pegawai) can only comment when ticket is returned to them
+        if ($ticket->reporter_id === $user->id) {
+            if ($ticket->status !== Ticket::STATUS_PENDING_USER) {
+                return back()->with('error', 'Komentar hanya diperbolehkan jika tiket dikembalikan ke Anda (Pending User) untuk informasi tambahan.');
+            }
+        } else {
+            // Not staff and not reporter - no access
             return back()->with('error', 'Anda tidak memiliki akses untuk berkomentar pada tiket ini.');
         }
 
@@ -80,6 +73,10 @@ class TicketCommentController extends Controller implements HasMiddleware
         // Auto-resume if it's pending_user and the reporter is commenting
         if ($ticket->status === Ticket::STATUS_PENDING_USER && $ticket->reporter_id === $user->id) {
             $this->ticketService->resumeFromPending($ticket, 'User memberikan respon/informasi tambahan.', $user);
+
+            // Redirect to my-tickets with success message
+            return redirect()->route('admin.tickets.my-tickets')
+                ->with('success', 'Tanggapan Anda berhasil dikirim. Tiket akan dilanjutkan oleh petugas.');
         }
 
         return back()->with('success', 'Komentar berhasil ditambahkan.');

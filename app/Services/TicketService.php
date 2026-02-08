@@ -135,18 +135,32 @@ class TicketService
             });
         }
 
-        return $query->orderBy('created_at', 'desc')
+        // Order: tickets needing verification (new, reopened) first, then by created_at desc
+        return $query->orderByRaw("CASE WHEN status IN ('new', 'reopened') THEN 0 ELSE 1 END")
+            ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
     }
 
     /**
-     * Get user's own tickets (untuk Pegawai)
+     * Get user's own tickets (role-aware)
+     * - Pegawai: tickets they created (reporter_id = user_id)
+     * - Helpdesk/Teknisi: tickets assigned to them (assigned_to_id = user_id)
      */
     public function getMyTickets(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Ticket::with(['category', 'userPriority', 'finalPriority'])
-            ->where('reporter_id', $user->id);
+        $query = Ticket::with(['category', 'userPriority', 'finalPriority', 'reporter', 'assignedTo']);
+
+        // Role-based filtering
+        $isStaff = $user->can('tickets.work') || $user->can('tickets.triage');
+
+        if ($isStaff) {
+            // Helpdesk/Teknisi: see tickets assigned to them
+            $query->where('assigned_to_id', $user->id);
+        } else {
+            // Pegawai: see tickets they created
+            $query->where('reporter_id', $user->id);
+        }
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -159,7 +173,16 @@ class TicketService
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('created_at', 'desc')
+        // Order: for Pegawai, pending_user first (needs response), then resolved (needs confirmation), then others
+        if (!$isStaff) {
+            $query->orderByRaw("CASE 
+                WHEN status = 'pending_user' THEN 0 
+                WHEN status = 'resolved' THEN 1 
+                ELSE 2 
+            END");
+        }
+
+        return $query->orderBy('updated_at', 'desc')
             ->paginate(10)
             ->withQueryString();
     }
@@ -389,6 +412,16 @@ class TicketService
         ]);
 
         $this->logAction($ticket, 'pending', $fromStatus, $newStatus, $reason, $user);
+
+        // Create a comment with the pending reason so it's visible in the conversation thread
+        $pendingLabel = $type === 'user' ? 'Dikembalikan ke Pelapor' : 'Menunggu Vendor/Pihak Ketiga';
+        \App\Models\TicketComment::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => $user->id,
+            'content' => "[{$pendingLabel}]\n\n{$reason}",
+            'is_internal' => false,
+            'created_at' => now(),
+        ]);
 
         return $ticket->fresh(['reporter', 'category', 'finalPriority', 'assignedTo']);
     }

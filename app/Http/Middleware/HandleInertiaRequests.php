@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -59,6 +60,9 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $user->getRoleNames(),
                 ] : null,
                 'permissions' => $user ? $user->getPermissionArray() : [],
+                'pending_user_count' => ($user && $user->hasRole('pegawai'))
+                    ? Ticket::where('reporter_id', $user->id)->where('status', Ticket::STATUS_PENDING_USER)->count()
+                    : 0,
             ],
 
             // 3. CONFIG: Informasi global aplikasi

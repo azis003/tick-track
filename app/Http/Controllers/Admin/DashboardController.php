@@ -148,44 +148,6 @@ class DashboardController extends Controller
             ->whereIn('status', ['resolved', 'closed']) // Count both resolved and closed
             ->count();
 
-        // Get tickets that need user action (specifically pending_user)
-        $actionRequiredTickets = Ticket::with(['category', 'userPriority'])
-            ->where('reporter_id', $user->id)
-            ->where('status', 'pending_user')
-            ->orderBy('updated_at', 'desc')
-            ->get()
-            ->map(function ($ticket) {
-                return [
-                    'id' => $ticket->id,
-                    'ticket_number' => $ticket->ticket_number,
-                    'title' => $ticket->title,
-                    'status' => $ticket->status,
-                    'status_label' => $this->getStatusLabel($ticket->status),
-                    'pending_reason' => $ticket->pending_reason,
-                    'created_at' => $ticket->created_at->diffForHumans(),
-                    'updated_at' => $ticket->updated_at->diffForHumans(),
-                ];
-            });
-
-        // Get recent tickets (limit 5)
-        $recentTickets = Ticket::with(['category', 'userPriority'])
-            ->where('reporter_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get()
-            ->map(function ($ticket) {
-                return [
-                    'id' => $ticket->id,
-                    'ticket_number' => $ticket->ticket_number,
-                    'title' => $ticket->title,
-                    'status' => $ticket->status,
-                    'status_label' => $this->getStatusLabel($ticket->status),
-                    'priority' => $ticket->userPriority?->name,
-                    'priority_color' => $ticket->userPriority?->color,
-                    'created_at' => $ticket->created_at->diffForHumans(),
-                ];
-            });
-
         return inertia('Admin/Dashboard/Pegawai/Index', [
             'stats' => [
                 'total' => $totalCount,
@@ -193,8 +155,6 @@ class DashboardController extends Controller
                 'pending' => $pendingCount,
                 'closed' => $closedCount,
             ],
-            'actionRequiredTickets' => $actionRequiredTickets,
-            'recentTickets' => $recentTickets,
         ]);
     }
 

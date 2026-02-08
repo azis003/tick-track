@@ -93,7 +93,7 @@ const getPriorityEmoji = (priority) => {
                             {{ ticket.created_at }}
                         </div>
                         <Link
-                            :href="`/admin/tickets/${ticket.id}/triage`"
+                            :href="`/admin/tickets/${ticket.id}`"
                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-yellow-700 transition-all duration-200 bg-yellow-100 border border-yellow-200 rounded-lg hover:bg-yellow-200 hover:border-yellow-300"
                         >
                             Triage

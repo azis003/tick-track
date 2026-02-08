@@ -24,6 +24,10 @@ const props = defineProps({
     comments: {
         type: Array,
         default: () => []
+    },
+    readOnly: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -101,22 +105,29 @@ const canViewInternal = () => {
 }
 
 // Check if user can add comment based on ticket status and role
+// IMPORTANT: Staff (Helpdesk/Teknisi) cannot add comments directly.
+// They can only add notes through workflow actions (e.g., "Return to User" action).
+// Only Reporter (Pegawai) can comment, and only when ticket is returned to them (pending_user).
 const canComment = computed(() => {
+    // If read-only mode, no commenting allowed
+    if (props.readOnly) {
+        return false
+    }
+    
     // No one can comment if closed or resolved
     if (props.ticket.status === 'closed' || props.ticket.status === 'resolved') {
         return false
     }
     
-    // Staff (technician/helpdesk) can always comment unless closed/resolved
+    // Staff (technician/helpdesk) CANNOT comment directly
+    // They use workflow action panels with notes fields instead
     const isStaff = canViewInternal()
-    if (isStaff) return true
+    if (isStaff) return false
 
-    // Reporter can only comment on specific statuses (new, pending_user, reopened)
-    const allowedReporterStatuses = ['new', 'pending_user', 'reopened']
+    // Reporter can only comment when ticket is returned to them (pending_user)
     const isReporter = props.ticket.reporter_id == auth?.user?.id
-    
-    if (isReporter) {
-        return allowedReporterStatuses.includes(props.ticket.status)
+    if (isReporter && props.ticket.status === 'pending_user') {
+        return true
     }
 
     return false
@@ -214,11 +225,14 @@ const handleFileUpload = (event) => {
                     <p v-else-if="ticket.status === 'resolved'" class="text-sm font-medium text-gray-600">
                         Tiket sudah selesai. Selesaikan konfirmasi atau buka kembali jika masalah masih ada.
                     </p>
+                    <p v-else-if="canViewInternal()" class="text-sm font-medium text-gray-600">
+                        Gunakan tombol aksi (seperti "Kembalikan ke User") untuk meminta informasi tambahan.
+                    </p>
                     <p v-else class="text-sm font-medium text-gray-600">
-                        Komentar hanya tersedia saat tiket dikembalikan teknisi (Pending User).
+                        Komentar hanya tersedia saat tiket dikembalikan kepada Anda untuk informasi tambahan.
                     </p>
                     <p class="text-xs text-gray-400 mt-0.5">
-                        {{ (ticket.status === 'closed' || ticket.status === 'resolved') ? 'History percakapan tetap tersimpan untuk audit.' : 'Hubungi helpdesk jika ada kendala mendesak.' }}
+                        {{ (ticket.status === 'closed' || ticket.status === 'resolved') ? 'History percakapan tetap tersimpan untuk audit.' : 'Riwayat percakapan tetap dapat dilihat di bawah.' }}
                     </p>
                 </div>
             </div>

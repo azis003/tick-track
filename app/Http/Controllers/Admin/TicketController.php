@@ -79,13 +79,13 @@ class TicketController extends Controller implements HasMiddleware
         ]);
     }
 
-    /**
-     * Tiket milik user yang login (Pegawai view)
-     */
     public function myTickets(Request $request): Response
     {
+        $user = $request->user();
+        $isStaff = $user->can('tickets.work') || $user->can('tickets.triage');
+
         $tickets = $this->ticketService->getMyTickets(
-            $request->user(),
+            $user,
             $request->only(['search', 'status'])
         );
 
@@ -93,6 +93,7 @@ class TicketController extends Controller implements HasMiddleware
             'tickets' => $tickets,
             'filters' => $request->only(['search', 'status']),
             'statuses' => Ticket::STATUS_LABELS,
+            'isStaff' => $isStaff,
         ]);
     }
 
@@ -148,7 +149,7 @@ class TicketController extends Controller implements HasMiddleware
             $request->file('attachments', [])
         );
 
-        return redirect('/admin/tickets/my-tickets')
+        return redirect()->route('admin.tickets.my-tickets')
             ->with('success', 'Tiket berhasil dibuat dengan nomor ' . $ticket->ticket_number);
     }
 
@@ -234,23 +235,42 @@ class TicketController extends Controller implements HasMiddleware
             return back()->with('error', 'Tiket ini tidak dapat di-triage.');
         }
 
+        $user = $request->user();
+        $action = $request->action;
+
+        // Step 1: Triage the ticket (set final priority)
         $this->ticketService->triageTicket(
             $ticket,
             $request->final_priority_id,
             $request->notes,
-            $request->user()
+            $user
         );
 
-        return back()->with('success', 'Tiket berhasil di-triage.');
+        // Step 2: Immediately assign or self-handle based on action
+        if ($action === 'assign') {
+            $this->ticketService->assignTicket(
+                $ticket,
+                $request->technician_id,
+                $user,
+                $request->notes
+            );
+            return redirect()->route('admin.tickets.index')
+                ->with('success', 'Tiket berhasil diverifikasi dan ditugaskan ke teknisi.');
+        } else {
+            // self_handle
+            $this->ticketService->startSelfHandle($ticket, $user);
+            return redirect()->route('admin.tickets.my-tickets')
+                ->with('success', 'Tiket berhasil diverifikasi. Anda mulai mengerjakan tiket ini.');
+        }
     }
 
     /**
-     * Assign ticket to technician
+     * Assign ticket to technician (kept for backward compatibility / reassign)
      */
     public function assign(AssignTicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        // Only allow assign for triaged tickets
-        if ($ticket->status !== Ticket::STATUS_TRIAGE) {
+        // Allow assign for triaged tickets OR reassign for assigned tickets
+        if (!in_array($ticket->status, [Ticket::STATUS_TRIAGE, Ticket::STATUS_ASSIGNED])) {
             return back()->with('error', 'Tiket harus di-triage terlebih dahulu sebelum ditugaskan.');
         }
 
@@ -265,11 +285,11 @@ class TicketController extends Controller implements HasMiddleware
     }
 
     /**
-     * Self-handle by Helpdesk
+     * Self-handle by Helpdesk (kept for backward compatibility)
      */
     public function selfHandle(Ticket $ticket): RedirectResponse
     {
-        // Only allow self-handle for triaged tickets
+        // Allow self-handle for triaged tickets
         if ($ticket->status !== Ticket::STATUS_TRIAGE) {
             return back()->with('error', 'Tiket harus di-triage terlebih dahulu.');
         }
@@ -376,7 +396,8 @@ class TicketController extends Controller implements HasMiddleware
         );
 
         $typeLabel = $request->type === 'user' ? 'User' : 'Vendor/Pihak Eksternal';
-        return back()->with('success', "Tiket di-pending menunggu {$typeLabel}.");
+        return redirect()->route('admin.tickets.my-tickets')
+            ->with('success', "Tiket di-pending menunggu {$typeLabel}.");
     }
 
     /**
@@ -488,7 +509,8 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->closeTicket($ticket, $user);
 
-        return back()->with('success', 'Tiket telah berhasil ditutup. Terima kasih atas konfirmasinya.');
+        return redirect()->route('admin.tickets.my-tickets')
+            ->with('success', 'Tiket telah berhasil ditutup. Terima kasih atas konfirmasinya.');
     }
 
     /**
@@ -514,6 +536,7 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->reopenTicket($ticket, $request->reason, $user);
 
-        return back()->with('success', 'Tiket telah dibuka kembali untuk diproses ulang oleh teknisi.');
+        return redirect()->route('admin.tickets.my-tickets')
+            ->with('success', 'Tiket telah dibuka kembali untuk diproses ulang oleh teknisi.');
     }
 }
