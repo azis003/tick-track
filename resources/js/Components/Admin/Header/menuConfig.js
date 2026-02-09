@@ -42,18 +42,25 @@ export const menuItems = [
         permissions: ['tickets.create', 'tickets.view-own', 'tickets.triage', 'tickets.view-all'],
         dropdown: [
             {
-                name: "Semua Tiket",
-                href: "/admin/tickets",
-                icon: Database,
-                description: "Database seluruh tiket sistem",
-                permissions: ['tickets.view-all']
-            },
-            {
                 name: "Tiket Saya",
                 href: "/admin/tickets/my-tickets",
                 icon: List,
-                description: "Tiket yang menjadi tanggung jawab Anda",
-                permissions: ['tickets.view-own', 'tickets.work', 'tickets.triage']
+                description: "Tiket yang Anda buat",
+                permissions: ['tickets.view-own', 'tickets.create']
+            },
+            {
+                name: "Daftar Tugas",
+                href: "/admin/tickets/task-queue",
+                icon: CheckSquare,
+                description: "Tiket yang memerlukan tindakan Anda",
+                permissions: ['tickets.view-own', 'tickets.work', 'tickets.triage', 'tickets.approve']
+            },
+            {
+                name: "Semua Tiket",
+                href: "/admin/tickets",
+                icon: Database,
+                description: "Lihat semua tiket dalam sistem",
+                permissions: ['tickets.view-all']
             },
         ],
     },

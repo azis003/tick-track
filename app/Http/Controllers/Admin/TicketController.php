@@ -79,13 +79,13 @@ class TicketController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Tiket Saya - tickets created by current user
+     */
     public function myTickets(Request $request): Response
     {
-        $user = $request->user();
-        $isStaff = $user->can('tickets.work') || $user->can('tickets.triage');
-
         $tickets = $this->ticketService->getMyTickets(
-            $user,
+            $request->user(),
             $request->only(['search', 'status'])
         );
 
@@ -93,7 +93,49 @@ class TicketController extends Controller implements HasMiddleware
             'tickets' => $tickets,
             'filters' => $request->only(['search', 'status']),
             'statuses' => Ticket::STATUS_LABELS,
-            'isStaff' => $isStaff,
+        ]);
+    }
+
+    /**
+     * Daftar Tugas - tickets requiring action from current user
+     */
+    public function taskQueue(Request $request): Response
+    {
+        $user = $request->user();
+
+        $tickets = $this->ticketService->getTaskQueue(
+            $user,
+            $request->only(['search', 'status'])
+        );
+
+        // Determine available statuses based on user role
+        $availableStatuses = [];
+
+        if ($user->can('tickets.triage')) {
+            $availableStatuses[Ticket::STATUS_NEW] = Ticket::STATUS_LABELS[Ticket::STATUS_NEW];
+            $availableStatuses[Ticket::STATUS_REOPENED] = Ticket::STATUS_LABELS[Ticket::STATUS_REOPENED];
+        }
+
+        if ($user->can('tickets.work')) {
+            $availableStatuses[Ticket::STATUS_ASSIGNED] = Ticket::STATUS_LABELS[Ticket::STATUS_ASSIGNED];
+            $availableStatuses[Ticket::STATUS_IN_PROGRESS] = Ticket::STATUS_LABELS[Ticket::STATUS_IN_PROGRESS];
+            $availableStatuses[Ticket::STATUS_PENDING_EXTERNAL] = Ticket::STATUS_LABELS[Ticket::STATUS_PENDING_EXTERNAL];
+        }
+
+        if ($user->can('tickets.approve')) {
+            $availableStatuses[Ticket::STATUS_WAITING_APPROVAL] = Ticket::STATUS_LABELS[Ticket::STATUS_WAITING_APPROVAL];
+        }
+
+        // Creator tasks
+        $availableStatuses[Ticket::STATUS_PENDING_USER] = Ticket::STATUS_LABELS[Ticket::STATUS_PENDING_USER];
+        $availableStatuses[Ticket::STATUS_RESOLVED] = Ticket::STATUS_LABELS[Ticket::STATUS_RESOLVED];
+
+        return Inertia::render('Admin/Tickets/TaskQueue', [
+            'tickets' => $tickets,
+            'filters' => $request->only(['search', 'status']),
+            'statuses' => $availableStatuses,
+            'priorities' => Priority::orderBy('level')->get(),
+            'technicians' => $this->getTechnicians(),
         ]);
     }
 
@@ -254,12 +296,12 @@ class TicketController extends Controller implements HasMiddleware
                 $user,
                 $request->notes
             );
-            return redirect()->route('admin.tickets.index')
+            return redirect()->route('admin.tickets.task-queue')
                 ->with('success', 'Tiket berhasil diverifikasi dan ditugaskan ke teknisi.');
         } else {
             // self_handle
             $this->ticketService->startSelfHandle($ticket, $user);
-            return redirect()->route('admin.tickets.my-tickets')
+            return redirect()->route('admin.tickets.task-queue')
                 ->with('success', 'Tiket berhasil diverifikasi. Anda mulai mengerjakan tiket ini.');
         }
     }
@@ -340,7 +382,7 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->returnToHelpdesk($ticket, $request->reason, $user);
 
-        return redirect('/admin/tickets/assigned')
+        return redirect()->route('admin.tickets.task-queue')
             ->with('success', 'Tiket berhasil dikembalikan ke Helpdesk.');
     }
 
@@ -396,7 +438,7 @@ class TicketController extends Controller implements HasMiddleware
         );
 
         $typeLabel = $request->type === 'user' ? 'User' : 'Vendor/Pihak Eksternal';
-        return redirect()->route('admin.tickets.my-tickets')
+        return redirect()->route('admin.tickets.task-queue')
             ->with('success', "Tiket di-pending menunggu {$typeLabel}.");
     }
 
@@ -487,19 +529,20 @@ class TicketController extends Controller implements HasMiddleware
             $request->file('evidence', [])
         );
 
-        return back()->with('success', 'Tiket berhasil diselesaikan. Menunggu konfirmasi dari pelapor.');
+        return redirect()->route('admin.tickets.task-queue')
+            ->with('success', 'Tiket berhasil diselesaikan. Menunggu konfirmasi dari pelapor.');
     }
 
     /**
-     * Close ticket (Reporter confirms resolution)
+     * Close ticket (Creator confirms resolution)
      */
     public function close(Request $request, Ticket $ticket): RedirectResponse
     {
         $user = auth()->user();
 
-        // Only reporter can close their own ticket
-        if ($ticket->reporter_id !== $user->id) {
-            return back()->with('error', 'Hanya pelapor yang dapat menutup tiket ini.');
+        // Only creator can close their own ticket
+        if ($ticket->created_by_id !== $user->id) {
+            return back()->with('error', 'Hanya pembuat tiket yang dapat menutup tiket ini.');
         }
 
         // Only allowed if status is resolved
@@ -509,20 +552,20 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->closeTicket($ticket, $user);
 
-        return redirect()->route('admin.tickets.my-tickets')
+        return redirect()->route('admin.tickets.task-queue')
             ->with('success', 'Tiket telah berhasil ditutup. Terima kasih atas konfirmasinya.');
     }
 
     /**
-     * Reopen ticket (Reporter not satisfied)
+     * Reopen ticket (Creator not satisfied)
      */
     public function reopen(Request $request, Ticket $ticket): RedirectResponse
     {
         $user = auth()->user();
 
-        // Only reporter can reopen their own ticket
-        if ($ticket->reporter_id !== $user->id) {
-            return back()->with('error', 'Hanya pelapor yang dapat membuka kembali tiket ini.');
+        // Only creator can reopen their own ticket
+        if ($ticket->created_by_id !== $user->id) {
+            return back()->with('error', 'Hanya pembuat tiket yang dapat membuka kembali tiket ini.');
         }
 
         // Only allowed if status is resolved
@@ -536,7 +579,18 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->reopenTicket($ticket, $request->reason, $user);
 
-        return redirect()->route('admin.tickets.my-tickets')
+        return redirect()->route('admin.tickets.task-queue')
             ->with('success', 'Tiket telah dibuka kembali untuk diproses ulang oleh teknisi.');
+    }
+
+    /**
+     * Get list of users with tickets.work permission (Teknisi)
+     */
+    private function getTechnicians()
+    {
+        return User::permission('tickets.work')
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
     }
 }

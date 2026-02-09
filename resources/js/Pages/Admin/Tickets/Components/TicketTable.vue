@@ -203,9 +203,9 @@ const formatDate = (dateString) => {
                                     <Eye class="h-4 w-4" />
                                     <span>Lihat</span>
                                 </Link>
-                                <!-- Verify Button (only for Helpdesk on new/reopened tickets) -->
+                                <!-- Verify Button (only for Helpdesk on new/reopened tickets, and only in Daftar Tugas) -->
                                 <Link
-                                    v-if="canTriage && needsVerification(ticket)"
+                                    v-if="highlightTriageRequired && canTriage && needsVerification(ticket)"
                                     :href="`/admin/tickets/${ticket.id}?action=triage`"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors font-medium shadow-sm"
                                 >
@@ -238,6 +238,15 @@ const formatDate = (dateString) => {
                                 >
                                     <CheckCircle class="h-4 w-4" />
                                     <span>Konfirmasi</span>
+                                </Link>
+                                <!-- View Button for Pegawai (fallback when no special action needed) -->
+                                <Link
+                                    v-if="highlightActionRequired && !needsReporterAction(ticket) && !needsConfirmation(ticket)"
+                                    :href="`/admin/tickets/${ticket.id}`"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                                >
+                                    <Eye class="h-4 w-4" />
+                                    <span>Lihat</span>
                                 </Link>
                             </div>
                         </td>

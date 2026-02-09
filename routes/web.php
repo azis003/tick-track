@@ -130,6 +130,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         // Phase 1: Basic CRUD
         Route::get('/', [TicketController::class, 'index'])->name('admin.tickets.index');
         Route::get('/my-tickets', [TicketController::class, 'myTickets'])->name('admin.tickets.my-tickets');
+        Route::get('/task-queue', [TicketController::class, 'taskQueue'])->name('admin.tickets.task-queue');
         Route::get('/unit', [TicketController::class, 'unitTickets'])->name('admin.tickets.unit');
         Route::get('/create', [TicketController::class, 'create'])->name('admin.tickets.create');
         Route::post('/', [TicketController::class, 'store'])->name('admin.tickets.store');

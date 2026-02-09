@@ -143,24 +143,13 @@ class TicketService
     }
 
     /**
-     * Get user's own tickets (role-aware)
-     * - Pegawai: tickets they created (reporter_id = user_id)
-     * - Helpdesk/Teknisi: tickets assigned to them (assigned_to_id = user_id)
+     * Get user's own tickets (tickets CREATED BY the user)
+     * This shows tickets where created_by_id = current user
      */
     public function getMyTickets(User $user, array $filters = []): LengthAwarePaginator
     {
-        $query = Ticket::with(['category', 'userPriority', 'finalPriority', 'reporter', 'assignedTo']);
-
-        // Role-based filtering
-        $isStaff = $user->can('tickets.work') || $user->can('tickets.triage');
-
-        if ($isStaff) {
-            // Helpdesk/Teknisi: see tickets assigned to them
-            $query->where('assigned_to_id', $user->id);
-        } else {
-            // Pegawai: see tickets they created
-            $query->where('reporter_id', $user->id);
-        }
+        $query = Ticket::with(['category', 'userPriority', 'finalPriority', 'reporter', 'assignedTo'])
+            ->where('created_by_id', $user->id);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -173,16 +162,91 @@ class TicketService
             $query->where('status', $filters['status']);
         }
 
-        // Order: for Pegawai, pending_user first (needs response), then resolved (needs confirmation), then others
-        if (!$isStaff) {
-            $query->orderByRaw("CASE 
-                WHEN status = 'pending_user' THEN 0 
-                WHEN status = 'resolved' THEN 1 
-                ELSE 2 
-            END");
+        return $query->orderBy('updated_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    /**
+     * Get task queue - tickets that require ACTION from the current user
+     * This is role-aware and shows different tickets based on user's role
+     */
+    public function getTaskQueue(User $user, array $filters = []): LengthAwarePaginator
+    {
+        $query = Ticket::with(['category', 'userPriority', 'finalPriority', 'reporter', 'assignedTo', 'createdBy']);
+
+        // Build conditions based on user role
+        $conditions = [];
+
+        // 1. Helpdesk: new/reopened tickets needing triage
+        if ($user->can('tickets.triage')) {
+            $conditions[] = function ($q) {
+                $q->whereIn('status', [Ticket::STATUS_NEW, Ticket::STATUS_REOPENED]);
+            };
         }
 
-        return $query->orderBy('updated_at', 'desc')
+        // 2. Teknisi: assigned tickets needing acceptance + in_progress tickets
+        if ($user->can('tickets.work')) {
+            $conditions[] = function ($q) use ($user) {
+                $q->where('assigned_to_id', $user->id)
+                    ->whereIn('status', [
+                        Ticket::STATUS_ASSIGNED,
+                        Ticket::STATUS_IN_PROGRESS,
+                        Ticket::STATUS_PENDING_EXTERNAL,
+                    ]);
+            };
+        }
+
+        // 3. Manager: tickets waiting approval
+        if ($user->can('tickets.approve')) {
+            $conditions[] = function ($q) {
+                $q->where('status', Ticket::STATUS_WAITING_APPROVAL);
+            };
+        }
+
+        // 4. Creator/Reporter: pending_user (need response) or resolved (need confirmation)
+        $conditions[] = function ($q) use ($user) {
+            $q->where('created_by_id', $user->id)
+                ->whereIn('status', [Ticket::STATUS_PENDING_USER, Ticket::STATUS_RESOLVED]);
+        };
+
+        // Apply OR conditions
+        if (!empty($conditions)) {
+            $query->where(function ($mainQuery) use ($conditions) {
+                foreach ($conditions as $index => $condition) {
+                    if ($index === 0) {
+                        $mainQuery->where($condition);
+                    } else {
+                        $mainQuery->orWhere($condition);
+                    }
+                }
+            });
+        }
+
+        // Apply search filter
+        if (!empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('ticket_number', 'like', "%{$filters['search']}%")
+                    ->orWhere('title', 'like', "%{$filters['search']}%");
+            });
+        }
+
+        // Apply status filter
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Order by priority: tickets needing immediate action first
+        return $query->orderByRaw("CASE 
+                WHEN status = 'new' THEN 0
+                WHEN status = 'reopened' THEN 1
+                WHEN status = 'assigned' THEN 2
+                WHEN status = 'pending_user' THEN 3
+                WHEN status = 'resolved' THEN 4
+                WHEN status = 'waiting_approval' THEN 5
+                ELSE 6
+            END")
+            ->orderBy('updated_at', 'desc')
             ->paginate(10)
             ->withQueryString();
     }

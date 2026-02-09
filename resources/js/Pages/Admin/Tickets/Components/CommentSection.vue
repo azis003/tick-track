@@ -107,7 +107,7 @@ const canViewInternal = () => {
 // Check if user can add comment based on ticket status and role
 // IMPORTANT: Staff (Helpdesk/Teknisi) cannot add comments directly.
 // They can only add notes through workflow actions (e.g., "Return to User" action).
-// Only Reporter (Pegawai) can comment, and only when ticket is returned to them (pending_user).
+// Only Creator (who created the ticket) can comment, and only when ticket is returned to them (pending_user).
 const canComment = computed(() => {
     // If read-only mode, no commenting allowed
     if (props.readOnly) {
@@ -124,9 +124,9 @@ const canComment = computed(() => {
     const isStaff = canViewInternal()
     if (isStaff) return false
 
-    // Reporter can only comment when ticket is returned to them (pending_user)
-    const isReporter = props.ticket.reporter_id == auth?.user?.id
-    if (isReporter && props.ticket.status === 'pending_user') {
+    // Creator can only comment when ticket is returned to them (pending_user)
+    const isCreator = props.ticket.created_by_id == auth?.user?.id
+    if (isCreator && props.ticket.status === 'pending_user') {
         return true
     }
 

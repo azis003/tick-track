@@ -52,7 +52,7 @@ const props = defineProps({
                     Semua Tiket
                 </h1>
                 <p class="text-sm text-gray-500 mt-1">
-                    Daftar semua tiket dalam sistem
+                    Lihat semua tiket dalam sistem (read-only)
                 </p>
             </div>
             <Link
@@ -74,13 +74,12 @@ const props = defineProps({
             route-name="admin.tickets.index"
         />
 
-        <!-- Table -->
+        <!-- Table (View-only, no action highlights) -->
         <TicketTable
             :tickets="tickets"
             :statuses="statuses"
             :show-reporter="true"
             :show-assignee="true"
-            :highlight-triage-required="true"
         />
     </LayoutAdmin>
 </template>

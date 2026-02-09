@@ -57,6 +57,12 @@ const props = defineProps({
 const page = usePage()
 const auth = computed(() => page.props.auth)
 
+// Is the current user the one who created the ticket (for action permissions)
+const isCreator = computed(() => {
+    return props.ticket.created_by_id === auth.value?.user?.id
+})
+
+// Is the current user the reporter (for display purposes, may differ from creator)
 const isReporter = computed(() => {
     return props.ticket.reporter_id === auth.value?.user?.id
 })
@@ -118,16 +124,18 @@ const showWorkPanel = computed(() => {
     return actionMode.value === 'work'
 })
 
+// Show action panel for ticket creator when their response is needed
 const showReporterActionPanel = computed(() => {
-    return isReporter.value && props.ticket.status === 'pending_user'
+    return isCreator.value && props.ticket.status === 'pending_user'
 })
 
+// Show confirmation section for creator when ticket is resolved
 const showConfirmSection = computed(() => {
-    return isReporter.value && props.ticket.status === 'resolved'
+    return isCreator.value && props.ticket.status === 'resolved'
 })
 
 // Check if we should use simplified 2-column layout (action mode)
-// This includes: Triage, Technician Accept, Work mode, and Reporter Response
+// This includes: Triage, Technician Accept, Work mode, and Creator Response
 const isActionMode = computed(() => {
     return showTriagePanel.value || showTechnicianPanel.value || showWorkPanel.value || showReporterActionPanel.value
 })
@@ -136,22 +144,22 @@ const isActionMode = computed(() => {
 const backUrl = computed(() => {
     // If coming from action mode, determine back URL based on action type
     if (actionMode.value === 'work') {
-        // Staff working on ticket - go back to their Tiket Saya
-        return '/admin/tickets/my-tickets'
+        // Staff working on ticket - go back to Task Queue
+        return '/admin/tickets/task-queue'
     }
     if (actionMode.value === 'triage') {
-        // Helpdesk triaging - go back to Semua Tiket
-        return '/admin/tickets'
+        // Helpdesk triaging - go back to Task Queue
+        return '/admin/tickets/task-queue'
     }
     
     // For regular view mode:
-    // Reporter viewing their ticket
-    if (isReporter.value) {
+    // Creator viewing their ticket - go to Tiket Saya
+    if (isCreator.value) {
         return '/admin/tickets/my-tickets'
     }
-    // Staff viewing ticket (not action mode)
+    // Staff viewing ticket (not action mode) - go to Task Queue
     if (canTriage.value || isAssignedTechnician.value) {
-        return '/admin/tickets'
+        return '/admin/tickets/task-queue'
     }
     return '/admin/tickets/my-tickets'
 })

@@ -50,13 +50,13 @@ class TicketCommentController extends Controller implements HasMiddleware
             return back()->with('error', 'Gunakan tombol aksi (seperti "Kembalikan ke User") untuk berkomunikasi dengan pelapor.');
         }
 
-        // 3. Reporter (Pegawai) can only comment when ticket is returned to them
-        if ($ticket->reporter_id === $user->id) {
+        // 3. Creator (who created the ticket) can only comment when ticket is returned to them
+        if ($ticket->created_by_id === $user->id) {
             if ($ticket->status !== Ticket::STATUS_PENDING_USER) {
                 return back()->with('error', 'Komentar hanya diperbolehkan jika tiket dikembalikan ke Anda (Pending User) untuk informasi tambahan.');
             }
         } else {
-            // Not staff and not reporter - no access
+            // Not staff and not creator - no access
             return back()->with('error', 'Anda tidak memiliki akses untuk berkomentar pada tiket ini.');
         }
 
@@ -70,12 +70,12 @@ class TicketCommentController extends Controller implements HasMiddleware
             $validated['is_internal'] ?? false
         );
 
-        // Auto-resume if it's pending_user and the reporter is commenting
-        if ($ticket->status === Ticket::STATUS_PENDING_USER && $ticket->reporter_id === $user->id) {
+        // Auto-resume if it's pending_user and the creator is commenting
+        if ($ticket->status === Ticket::STATUS_PENDING_USER && $ticket->created_by_id === $user->id) {
             $this->ticketService->resumeFromPending($ticket, 'User memberikan respon/informasi tambahan.', $user);
 
-            // Redirect to my-tickets with success message
-            return redirect()->route('admin.tickets.my-tickets')
+            // Redirect to task-queue with success message
+            return redirect()->route('admin.tickets.task-queue')
                 ->with('success', 'Tanggapan Anda berhasil dikirim. Tiket akan dilanjutkan oleh petugas.');
         }
 
