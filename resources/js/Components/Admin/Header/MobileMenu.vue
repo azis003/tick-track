@@ -34,6 +34,7 @@ defineProps({
 
 const { props } = usePage()
 const pendingCount = props.auth.pending_user_count || 0
+const taskQueueCount = props.auth.task_queue_count || 0
 
 // Filter menu items berdasarkan permission user (sesuai seeder_planning.md)
 const filteredMenuItems = getFilteredMenuItems()
@@ -78,7 +79,7 @@ const userNavigation = [
                                         <component :is="item.icon" class="w-5 h-5 mr-3" />
                                         <!-- Notification Dot for Tiket Menu -->
                                         <span 
-                                            v-if="item.name === 'Tiket' && pendingCount > 0"
+                                            v-if="item.name === 'Tiket' && (pendingCount > 0 || taskQueueCount > 0)"
                                             class="absolute -top-1 right-1.5 flex h-3 w-3"
                                         >
                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -130,6 +131,13 @@ const userNavigation = [
                                                         class="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded-full"
                                                     >
                                                         {{ pendingCount }}
+                                                    </span>
+                                                    <!-- Badge for Daftar Tugas -->
+                                                    <span 
+                                                        v-if="subItem.name === 'Daftar Tugas' && taskQueueCount > 0"
+                                                        class="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold text-white bg-orange-500 rounded-full"
+                                                    >
+                                                        {{ taskQueueCount }}
                                                     </span>
                                                 </div>
                                                 <div v-if="subItem.description" class="text-[11px] text-gray-500 mt-0.5 leading-relaxed">

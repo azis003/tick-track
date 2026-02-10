@@ -63,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 'pending_user_count' => ($user && $user->hasRole('pegawai'))
                     ? Ticket::where('reporter_id', $user->id)->where('status', Ticket::STATUS_PENDING_USER)->count()
                     : 0,
+                'task_queue_count' => fn() => $user ? $this->getTaskQueueCount($user) : 0,
             ],
 
             // 3. CONFIG: Informasi global aplikasi
@@ -72,5 +73,62 @@ class HandleInertiaRequests extends Middleware
             ],
 
         ];
+    }
+
+    /**
+     * Hitung jumlah tiket yang memerlukan tindakan dari user saat ini.
+     * Logika sama dengan TicketService::getTaskQueue tapi hanya count.
+     */
+    private function getTaskQueueCount($user): int
+    {
+        $query = Ticket::query();
+        $conditions = [];
+
+        // 1. Helpdesk: tiket new/reopened perlu verifikasi
+        if ($user->can('tickets.triage')) {
+            $conditions[] = function ($q) {
+                $q->whereIn('status', [Ticket::STATUS_NEW, Ticket::STATUS_REOPENED]);
+            };
+        }
+
+        // 2. Teknisi: tiket yang ditugaskan perlu dikerjakan
+        if ($user->can('tickets.work')) {
+            $conditions[] = function ($q) use ($user) {
+                $q->where('assigned_to_id', $user->id)
+                    ->whereIn('status', [
+                        Ticket::STATUS_ASSIGNED,
+                        Ticket::STATUS_IN_PROGRESS,
+                        Ticket::STATUS_PENDING_EXTERNAL,
+                    ]);
+            };
+        }
+
+        // 3. Manager: tiket menunggu approval
+        if ($user->can('tickets.approve')) {
+            $conditions[] = function ($q) {
+                $q->where('status', Ticket::STATUS_WAITING_APPROVAL);
+            };
+        }
+
+        // 4. Creator: tiket pending response atau perlu konfirmasi penyelesaian
+        $conditions[] = function ($q) use ($user) {
+            $q->where('created_by_id', $user->id)
+                ->whereIn('status', [Ticket::STATUS_PENDING_USER, Ticket::STATUS_RESOLVED]);
+        };
+
+        // Apply OR conditions
+        if (!empty($conditions)) {
+            $query->where(function ($mainQuery) use ($conditions) {
+                foreach ($conditions as $index => $condition) {
+                    if ($index === 0) {
+                        $mainQuery->where($condition);
+                    } else {
+                        $mainQuery->orWhere($condition);
+                    }
+                }
+            });
+        }
+
+        return $query->count();
     }
 }

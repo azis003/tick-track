@@ -20,6 +20,7 @@ defineProps({
 
 const { props } = usePage()
 const pendingCount = props.auth.pending_user_count || 0
+const taskQueueCount = props.auth.task_queue_count || 0
 </script>
 
 <template>
@@ -69,6 +70,13 @@ const pendingCount = props.auth.pending_user_count || 0
                                 class="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm group-hover:scale-110 transition-transform"
                             >
                                 {{ pendingCount }}
+                            </span>
+                            <!-- Badge for Daftar Tugas -->
+                            <span 
+                                v-if="subItem.name === 'Daftar Tugas' && taskQueueCount > 0"
+                                class="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold text-white bg-orange-500 rounded-full shadow-sm group-hover:scale-110 transition-transform"
+                            >
+                                {{ taskQueueCount }}
                             </span>
                         </div>
 

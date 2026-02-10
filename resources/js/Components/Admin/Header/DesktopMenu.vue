@@ -29,6 +29,7 @@ defineProps({
 
 const { props } = usePage()
 const pendingCount = props.auth.pending_user_count || 0
+const taskQueueCount = props.auth.task_queue_count || 0
 
 // Filter menu items berdasarkan permission user sesuai planning
 const filteredMenuItems = getFilteredMenuItems();
@@ -53,7 +54,7 @@ const filteredMenuItems = getFilteredMenuItems();
                                 <component :is="item.icon" class="w-5 h-5 mr-2.5" />
                                 <!-- Notification Dot for Tiket Menu -->
                                 <span 
-                                    v-if="item.name === 'Tiket' && pendingCount > 0"
+                                    v-if="item.name === 'Tiket' && (pendingCount > 0 || taskQueueCount > 0)"
                                     class="absolute -top-1 -right-1 flex h-3 w-3"
                                 >
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
