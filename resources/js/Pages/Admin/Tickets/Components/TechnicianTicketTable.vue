@@ -3,10 +3,9 @@ import { Link, useForm, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import StatusBadge from './StatusBadge.vue'
 import PriorityBadge from './PriorityBadge.vue'
+import Pagination from '@/Shared/Pagination.vue'
 import { 
     Eye, 
-    ChevronLeft, 
-    ChevronRight, 
     Play, 
     RotateCcw, 
     Wrench,
@@ -213,29 +212,18 @@ const isWorkingStatus = (status) => ['in_progress', 'pending_user', 'pending_ext
         </div>
 
         <!-- Pagination -->
-        <div v-if="tickets.last_page > 1" class="px-6 py-4 bg-gray-50 border-t flex items-center justify-between">
-            <div class="text-sm text-gray-600">
-                Menampilkan {{ tickets.from }} - {{ tickets.to }} dari {{ tickets.total }} tiket
-            </div>
-            <div class="flex gap-2">
-                <Link
-                    v-if="tickets.prev_page_url"
-                    :href="tickets.prev_page_url"
-                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-                    preserve-scroll
-                >
-                    <ChevronLeft class="h-4 w-4" />
-                    <span>Prev</span>
-                </Link>
-                <Link
-                    v-if="tickets.next_page_url"
-                    :href="tickets.next_page_url"
-                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-                    preserve-scroll
-                >
-                    <span>Next</span>
-                    <ChevronRight class="h-4 w-4" />
-                </Link>
+        <div v-if="tickets.data?.length > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <p class="text-sm text-gray-600">
+                    Menampilkan
+                    <span class="font-semibold">{{ tickets.from }}</span>
+                    -
+                    <span class="font-semibold">{{ tickets.to }}</span>
+                    dari
+                    <span class="font-semibold">{{ tickets.total }}</span>
+                    data
+                </p>
+                <Pagination :links="tickets.links" />
             </div>
         </div>
 

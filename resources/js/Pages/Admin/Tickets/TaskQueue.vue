@@ -27,6 +27,7 @@ import { hasPermission } from '@/Utils/Permissions'
 import TicketFilters from './Components/TicketFilters.vue'
 import StatusBadge from './Components/StatusBadge.vue'
 import PriorityBadge from './Components/PriorityBadge.vue'
+import Pagination from '@/Shared/Pagination.vue'
 
 // props
 const props = defineProps({
@@ -351,27 +352,18 @@ const getRowClasses = (ticket) => {
             </div>
 
             <!-- Pagination -->
-            <div v-if="tickets.data && tickets.data.length > 0" class="px-6 py-4 border-t border-gray-100">
-                <div class="flex items-center justify-between text-sm text-gray-500">
-                    <span>
-                        Menampilkan {{ tickets.from }} - {{ tickets.to }} dari {{ tickets.total }} tugas
-                    </span>
-                    <div class="flex gap-1">
-                        <Link
-                            v-if="tickets.prev_page_url"
-                            :href="tickets.prev_page_url"
-                            class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                            ← Sebelumnya
-                        </Link>
-                        <Link
-                            v-if="tickets.next_page_url"
-                            :href="tickets.next_page_url"
-                            class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                            Selanjutnya →
-                        </Link>
-                    </div>
+            <div v-if="tickets.data && tickets.data.length > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <p class="text-sm text-gray-600">
+                        Menampilkan
+                        <span class="font-semibold">{{ tickets.from }}</span>
+                        -
+                        <span class="font-semibold">{{ tickets.to }}</span>
+                        dari
+                        <span class="font-semibold">{{ tickets.total }}</span>
+                        data
+                    </p>
+                    <Pagination :links="tickets.links" />
                 </div>
             </div>
         </div>

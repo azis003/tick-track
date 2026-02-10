@@ -5,6 +5,7 @@ import { ref, watch } from 'vue'
 import { AlertTriangle, Search, Filter, Eye, RotateCcw } from 'lucide-vue-next'
 import StatusBadge from './Components/StatusBadge.vue'
 import PriorityBadge from './Components/PriorityBadge.vue'
+import Pagination from '@/Shared/Pagination.vue'
 import debounce from 'lodash/debounce'
 
 /**
@@ -235,27 +236,18 @@ const formatDate = (dateString) => {
             </div>
 
             <!-- Pagination -->
-            <div v-if="tickets.last_page > 1" class="px-6 py-4 bg-gray-50 border-t flex items-center justify-between">
-                <div class="text-sm text-gray-600">
-                    Menampilkan {{ tickets.from }} - {{ tickets.to }} dari {{ tickets.total }} tiket
-                </div>
-                <div class="flex gap-2">
-                    <Link
-                        v-if="tickets.prev_page_url"
-                        :href="tickets.prev_page_url"
-                        class="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-                        preserve-scroll
-                    >
-                        Prev
-                    </Link>
-                    <Link
-                        v-if="tickets.next_page_url"
-                        :href="tickets.next_page_url"
-                        class="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-100 transition-colors"
-                        preserve-scroll
-                    >
-                        Next
-                    </Link>
+            <div v-if="tickets.data?.length > 0" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <p class="text-sm text-gray-600">
+                        Menampilkan
+                        <span class="font-semibold">{{ tickets.from }}</span>
+                        -
+                        <span class="font-semibold">{{ tickets.to }}</span>
+                        dari
+                        <span class="font-semibold">{{ tickets.total }}</span>
+                        data
+                    </p>
+                    <Pagination :links="tickets.links" />
                 </div>
             </div>
         </div>
