@@ -40,6 +40,8 @@ const actionIcons = {
     request_approval: Send,
     approve: CheckCircle,
     reject: XCircle,
+    approval_approved: CheckCircle,
+    approval_rejected: XCircle,
 }
 
 const actionColors = {
@@ -57,6 +59,8 @@ const actionColors = {
     request_approval: 'text-pink-500 bg-pink-100',
     approve: 'text-green-500 bg-green-100',
     reject: 'text-red-500 bg-red-100',
+    approval_approved: 'text-green-500 bg-green-100',
+    approval_rejected: 'text-red-500 bg-red-100',
 }
 
 const actionLabels = {
@@ -74,6 +78,8 @@ const actionLabels = {
     request_approval: 'Minta Persetujuan',
     approve: 'Disetujui',
     reject: 'Ditolak',
+    approval_approved: 'Approval Disetujui',
+    approval_rejected: 'Approval Ditolak',
 }
 
 const formatDate = (dateString) => {

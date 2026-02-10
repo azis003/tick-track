@@ -37,6 +37,7 @@ class RoleSeeder extends Seeder
             'tickets.close',
             'tickets.reopen',
             'tickets.return',
+            'tickets.approve',
 
             // Comments Module
             'comments.create',
@@ -169,6 +170,7 @@ class RoleSeeder extends Seeder
         $manager->givePermissionTo([
             'tickets.view-own',
             'tickets.view-all',
+            'tickets.approve',
             'approvals.approve',
             'comments.create',
             'dashboard.view',

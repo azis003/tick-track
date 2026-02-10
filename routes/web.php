@@ -151,6 +151,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/{ticket}/pending', [TicketController::class, 'setPending'])->name('admin.tickets.pending');
         Route::post('/{ticket}/resume', [TicketController::class, 'resume'])->name('admin.tickets.resume');
         Route::post('/{ticket}/request-approval', [TicketController::class, 'requestApproval'])->name('admin.tickets.request-approval');
+        Route::post('/{ticket}/approve', [TicketController::class, 'approve'])->name('admin.tickets.approve');
+        Route::post('/{ticket}/reject', [TicketController::class, 'reject'])->name('admin.tickets.reject');
         Route::post('/{ticket}/resolve', [TicketController::class, 'resolve'])->name('admin.tickets.resolve');
 
         // Phase 4: Close & Reopen

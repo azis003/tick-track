@@ -29,6 +29,7 @@ import WorkActionPanel from './Components/WorkActionPanel.vue'
 import CommentSection from './Components/CommentSection.vue'
 import ReporterActionPanel from './Components/ReporterActionPanel.vue'
 import ConfirmResolvedSection from './Components/ConfirmResolvedSection.vue'
+import ApprovalActionPanel from './Components/ApprovalActionPanel.vue'
 
 // props
 const props = defineProps({
@@ -86,6 +87,12 @@ const canAcceptTicket = computed(() => {
     return permissions['tickets.accept'] === true
 })
 
+// Check if user can approve tickets (manager)
+const canApprove = computed(() => {
+    const permissions = auth.value?.permissions || {}
+    return permissions['tickets.approve'] === true
+})
+
 // Check if action mode is requested via query param
 const actionMode = computed(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -124,6 +131,13 @@ const showWorkPanel = computed(() => {
     return actionMode.value === 'work'
 })
 
+// Check if approval panel should be shown (for Manager)
+const showApprovalPanel = computed(() => {
+    if (!canApprove.value) return false
+    if (props.ticket.status !== 'waiting_approval') return false
+    return actionMode.value === 'approve'
+})
+
 // Show action panel for ticket creator when their response is needed
 // Disabled here because creator actions should be done via Task Queue popup
 const showReporterActionPanel = computed(() => {
@@ -137,9 +151,9 @@ const showConfirmSection = computed(() => {
 })
 
 // Check if we should use simplified 2-column layout (action mode)
-// This includes: Triage, Technician Accept, Work mode
+// This includes: Triage, Technician Accept, Work mode, Approval
 const isActionMode = computed(() => {
-    return showTriagePanel.value || showTechnicianPanel.value || showWorkPanel.value 
+    return showTriagePanel.value || showTechnicianPanel.value || showWorkPanel.value || showApprovalPanel.value
 })
 
 // Dynamic back URL based on context and action mode
@@ -151,6 +165,10 @@ const backUrl = computed(() => {
     }
     if (actionMode.value === 'triage') {
         // Helpdesk triaging - go back to Task Queue
+        return '/admin/tickets/task-queue'
+    }
+    if (actionMode.value === 'approve') {
+        // Manager reviewing approval - go back to Task Queue
         return '/admin/tickets/task-queue'
     }
     
@@ -329,6 +347,11 @@ const formatDate = (dateString) => {
                     <!-- Work Action Panel -->
                     <WorkActionPanel
                         v-if="showWorkPanel"
+                        :ticket="ticket"
+                    />
+                    <!-- Approval Action Panel -->
+                    <ApprovalActionPanel
+                        v-if="showApprovalPanel"
                         :ticket="ticket"
                     />
                     <!-- Reporter Response: Comment Section for replying -->

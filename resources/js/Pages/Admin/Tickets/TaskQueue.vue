@@ -121,6 +121,8 @@ const getActionUrl = (ticket, actionType) => {
         case 'accept':
         case 'work':
             return `${baseUrl}?action=work`
+        case 'approve':
+            return `${baseUrl}?action=approve`
         case 'confirm':
             return '#' // Handled by handleAction
         default:

@@ -225,6 +225,7 @@ class TicketController extends Controller implements HasMiddleware
             'comments.user',
             'comments.attachments',
             'attachments.user',
+            'approvals.requestedBy',
         ]);
 
         // Add computed attributes
@@ -499,6 +500,63 @@ class TicketController extends Controller implements HasMiddleware
         );
 
         return back()->with('success', 'Permintaan approval telah dikirim ke Manager.');
+    }
+
+    /**
+     * Approve ticket (Manager)
+     */
+    public function approve(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if (!$user->can('tickets.approve')) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menyetujui permintaan.');
+        }
+
+        if ($ticket->status !== Ticket::STATUS_WAITING_APPROVAL) {
+            return back()->with('error', 'Tiket tidak dalam status menunggu approval.');
+        }
+
+        $this->ticketService->approveTicket(
+            $ticket,
+            $request->input('decision_notes') ?? '',
+            $user
+        );
+
+        return redirect()->route('admin.tickets.task-queue')
+            ->with('success', 'Permintaan telah disetujui. Tiket dilanjutkan ke pengerjaan.');
+    }
+
+    /**
+     * Reject ticket approval (Manager)
+     */
+    public function reject(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if (!$user->can('tickets.approve')) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menolak permintaan.');
+        }
+
+        if ($ticket->status !== Ticket::STATUS_WAITING_APPROVAL) {
+            return back()->with('error', 'Tiket tidak dalam status menunggu approval.');
+        }
+
+        $request->validate([
+            'decision_notes' => 'required|string|min:10|max:2000',
+        ], [
+            'decision_notes.required' => 'Alasan penolakan wajib diisi.',
+            'decision_notes.min' => 'Alasan penolakan minimal 10 karakter.',
+        ]);
+
+        $this->ticketService->rejectTicket(
+            $ticket,
+            $request->input('decision_notes'),
+            $user
+        );
+
+        return redirect()->route('admin.tickets.task-queue')
+            ->with('success', 'Permintaan telah ditolak. Tiket dikembalikan ke pengerjaan.');
     }
 
     /**

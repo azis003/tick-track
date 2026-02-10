@@ -541,6 +541,78 @@ class TicketService
     }
 
     /**
+     * Approve ticket (Manager approves the request)
+     * Tiket dikembalikan ke in_progress agar teknisi melanjutkan pengerjaan
+     */
+    public function approveTicket(Ticket $ticket, string $decisionNotes, User $approver): Ticket
+    {
+        $fromStatus = $ticket->status;
+
+        return DB::transaction(function () use ($ticket, $decisionNotes, $approver, $fromStatus) {
+            // Update approval record
+            $approval = $ticket->approvals()->where('status', 'pending')->latest()->first();
+            if ($approval) {
+                $approval->update([
+                    'approved_by_id' => $approver->id,
+                    'status' => 'approved',
+                    'decision_notes' => $decisionNotes ?: null,
+                    'decided_at' => now(),
+                ]);
+            }
+
+            // Kembalikan tiket ke in_progress
+            $ticket->update(['status' => Ticket::STATUS_IN_PROGRESS]);
+
+            $this->logAction(
+                $ticket,
+                'approval_approved',
+                $fromStatus,
+                Ticket::STATUS_IN_PROGRESS,
+                $decisionNotes ?: 'Permintaan disetujui oleh Manager',
+                $approver
+            );
+
+            return $ticket->fresh();
+        });
+    }
+
+    /**
+     * Reject ticket approval (Manager rejects the request)
+     * Tiket dikembalikan ke in_progress agar teknisi mencari solusi alternatif
+     */
+    public function rejectTicket(Ticket $ticket, string $decisionNotes, User $approver): Ticket
+    {
+        $fromStatus = $ticket->status;
+
+        return DB::transaction(function () use ($ticket, $decisionNotes, $approver, $fromStatus) {
+            // Update approval record
+            $approval = $ticket->approvals()->where('status', 'pending')->latest()->first();
+            if ($approval) {
+                $approval->update([
+                    'approved_by_id' => $approver->id,
+                    'status' => 'rejected',
+                    'decision_notes' => $decisionNotes,
+                    'decided_at' => now(),
+                ]);
+            }
+
+            // Kembalikan tiket ke in_progress
+            $ticket->update(['status' => Ticket::STATUS_IN_PROGRESS]);
+
+            $this->logAction(
+                $ticket,
+                'approval_rejected',
+                $fromStatus,
+                Ticket::STATUS_IN_PROGRESS,
+                $decisionNotes,
+                $approver
+            );
+
+            return $ticket->fresh();
+        });
+    }
+
+    /**
      * Resolve ticket with solution
      */
     public function resolveTicket(Ticket $ticket, string $resolution, User $resolver, array $evidenceFiles = []): Ticket
