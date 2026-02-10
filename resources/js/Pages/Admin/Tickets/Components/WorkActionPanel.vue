@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import Swal from 'sweetalert2'
 import { 
     PlayCircle, 
     PauseCircle, 
@@ -74,11 +75,23 @@ const submitPending = () => {
 }
 
 const resumeTicket = () => {
-    if (confirm('Lanjutkan pengerjaan tiket ini?')) {
-        useForm({ notes: 'Dilanjutkan' }).post(`/admin/tickets/${props.ticket.id}/resume`, {
-            preserveScroll: true
-        })
-    }
+    Swal.fire({
+        title: 'Lanjutkan Pengerjaan?',
+        text: 'Anda akan mulai mengerjakan kembali tiket ini.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb', // blue-600
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Lanjutkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            useForm({ notes: 'Dilanjutkan' }).post(`/admin/tickets/${props.ticket.id}/resume`, {
+                preserveScroll: true
+            })
+        }
+    })
 }
 
 const submitResolve = () => {

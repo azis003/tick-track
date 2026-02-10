@@ -3,13 +3,14 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import StatusBadge from './StatusBadge.vue'
 import PriorityBadge from './PriorityBadge.vue'
-import { Eye, ClipboardCheck, MessageCircle, ChevronLeft, ChevronRight, Wrench, CheckCircle } from 'lucide-vue-next'
+import { Eye, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 /**
  * TicketTable Component
  * Tabel data tiket dengan pagination
  */
 const props = defineProps({
+// ... existing props ...
     tickets: {
         type: Object,
         required: true
@@ -23,18 +24,6 @@ const props = defineProps({
         default: true
     },
     showAssignee: {
-        type: Boolean,
-        default: false
-    },
-    highlightActionRequired: {
-        type: Boolean,
-        default: false
-    },
-    showWorkAction: {
-        type: Boolean,
-        default: false
-    },
-    highlightTriageRequired: {
         type: Boolean,
         default: false
     }
@@ -194,56 +183,9 @@ const formatDate = (dateString) => {
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <!-- View Button (only in Semua Tiket, not in Tiket Saya) -->
                                 <Link
-                                    v-if="!showWorkAction && !highlightActionRequired"
                                     :href="`/admin/tickets/${ticket.id}`"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                                >
-                                    <Eye class="h-4 w-4" />
-                                    <span>Lihat</span>
-                                </Link>
-                                <!-- Verify Button (only for Helpdesk on new/reopened tickets, and only in Daftar Tugas) -->
-                                <Link
-                                    v-if="highlightTriageRequired && canTriage && needsVerification(ticket)"
-                                    :href="`/admin/tickets/${ticket.id}?action=triage`"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors font-medium shadow-sm"
-                                >
-                                    <ClipboardCheck class="h-4 w-4" />
-                                    <span>Verifikasi</span>
-                                </Link>
-                                <!-- Work Button (for staff's assigned tickets) -->
-                                <Link
-                                    v-if="showWorkAction && canWork(ticket)"
-                                    :href="`/admin/tickets/${ticket.id}?action=work`"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors font-medium shadow-sm"
-                                >
-                                    <Wrench class="h-4 w-4" />
-                                    <span>Kerjakan</span>
-                                </Link>
-                                <!-- Respond Button (for reporter on pending_user tickets) -->
-                                <Link
-                                    v-if="highlightActionRequired && needsReporterAction(ticket)"
-                                    :href="`/admin/tickets/${ticket.id}`"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors font-medium shadow-sm animate-bounce-subtle"
-                                >
-                                    <MessageCircle class="h-4 w-4" />
-                                    <span>Tanggapi</span>
-                                </Link>
-                                <!-- Confirm Button (for reporter on resolved tickets) -->
-                                <Link
-                                    v-if="highlightActionRequired && needsConfirmation(ticket)"
-                                    :href="`/admin/tickets/${ticket.id}`"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors font-medium shadow-sm animate-bounce-subtle"
-                                >
-                                    <CheckCircle class="h-4 w-4" />
-                                    <span>Konfirmasi</span>
-                                </Link>
-                                <!-- View Button for Pegawai (fallback when no special action needed) -->
-                                <Link
-                                    v-if="highlightActionRequired && !needsReporterAction(ticket) && !needsConfirmation(ticket)"
-                                    :href="`/admin/tickets/${ticket.id}`"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                                 >
                                     <Eye class="h-4 w-4" />
                                     <span>Lihat</span>
@@ -292,6 +234,71 @@ const formatDate = (dateString) => {
                     <span>Next</span>
                     <ChevronRight class="h-4 w-4" />
                 </Link>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="showConfirmModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="showConfirmModal = false"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 text-left">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <CheckCircle class="w-6 h-6 text-green-600" />
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Konfirmasi Penyelesaian</h3>
+                    </div>
+                    <button @click="showConfirmModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <X class="w-6 h-6" />
+                    </button>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-gray-600 mb-4">
+                        Apakah kendala pada tiket <span class="font-mono font-bold text-blue-600">{{ selectedTicket?.ticket_number }}</span> sudah teratasi dengan baik?
+                    </p>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-4">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Solusi dari Teknisi:</h4>
+                        <p class="text-gray-700 italic">"{{ selectedTicket?.resolution || 'Tidak ada catatan solusi' }}"</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Catatan Tambahan (Opsional, wajib diisi jika membuka kembali)
+                        </label>
+                        <textarea
+                            v-model="confirmForm.reason"
+                            rows="3"
+                            class="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all text-sm"
+                            placeholder="Tuliskan alasan jika masalah belum selesai..."
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button
+                        @click="submitClose"
+                        :disabled="confirmForm.processing"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-200 disabled:opacity-50"
+                    >
+                        <CheckCircle class="w-5 h-5" />
+                        Ya, Selesai
+                    </button>
+                    <button
+                        @click="submitReopen"
+                        :disabled="confirmForm.processing"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-red-600 border-2 border-red-100 font-bold rounded-xl hover:bg-red-50 hover:border-red-200 transition-all disabled:opacity-50"
+                    >
+                        <X class="w-5 h-5" />
+                        Re-Open
+                    </button>
+                </div>
             </div>
         </div>
     </div>

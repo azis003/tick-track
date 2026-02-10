@@ -125,19 +125,21 @@ const showWorkPanel = computed(() => {
 })
 
 // Show action panel for ticket creator when their response is needed
+// Disabled here because creator actions should be done via Task Queue popup
 const showReporterActionPanel = computed(() => {
-    return isCreator.value && props.ticket.status === 'pending_user'
+    return false
 })
 
 // Show confirmation section for creator when ticket is resolved
+// Disabled here because creator actions should be done via Task Queue popup
 const showConfirmSection = computed(() => {
-    return isCreator.value && props.ticket.status === 'resolved'
+    return false
 })
 
 // Check if we should use simplified 2-column layout (action mode)
-// This includes: Triage, Technician Accept, Work mode, and Creator Response
+// This includes: Triage, Technician Accept, Work mode
 const isActionMode = computed(() => {
-    return showTriagePanel.value || showTechnicianPanel.value || showWorkPanel.value || showReporterActionPanel.value
+    return showTriagePanel.value || showTechnicianPanel.value || showWorkPanel.value 
 })
 
 // Dynamic back URL based on context and action mode

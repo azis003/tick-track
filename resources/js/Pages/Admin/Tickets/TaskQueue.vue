@@ -3,8 +3,9 @@
 import LayoutAdmin from '@/Layouts/LayoutAdmin.vue'
 
 // import inertia
-import { Head, Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3'
+import Swal from 'sweetalert2'
+import { computed, ref, reactive } from 'vue'
 
 // import icons
 import { 
@@ -14,7 +15,9 @@ import {
     MessageCircle, 
     CheckCircle,
     AlertCircle,
-    Eye
+    Eye,
+    X,
+    MessageSquare
 } from 'lucide-vue-next'
 
 // import permissions helper
@@ -27,6 +30,7 @@ import PriorityBadge from './Components/PriorityBadge.vue'
 
 // props
 const props = defineProps({
+// ... existing props ...
     tickets: {
         type: Object,
         required: true
@@ -52,6 +56,13 @@ const props = defineProps({
 const page = usePage()
 const auth = computed(() => page.props.auth)
 const currentUserId = computed(() => auth.value?.user?.id)
+
+// Modal State
+const showConfirmModal = ref(false)
+const selectedTicket = ref(null)
+const confirmForm = useForm({
+    reason: ''
+})
 
 // Helper functions to determine action type for each ticket
 const getActionType = (ticket) => {
@@ -88,6 +99,18 @@ const getActionType = (ticket) => {
     return { type: 'view', label: 'Lihat', color: 'gray', icon: Eye }
 }
 
+const handleAction = (ticket) => {
+    const action = getActionType(ticket)
+    if (action.type === 'confirm') {
+        selectedTicket.value = ticket
+        showConfirmModal.value = true
+        return
+    }
+    
+    // Default: Redirect to detail page using Inertia router
+    router.visit(getActionUrl(ticket, action.type))
+}
+
 const getActionUrl = (ticket, actionType) => {
     const baseUrl = `/admin/tickets/${ticket.id}`
     
@@ -97,9 +120,48 @@ const getActionUrl = (ticket, actionType) => {
         case 'accept':
         case 'work':
             return `${baseUrl}?action=work`
+        case 'confirm':
+            return '#' // Handled by handleAction
         default:
             return baseUrl
     }
+}
+
+const submitClose = () => {
+    confirmForm.post(`/admin/tickets/${selectedTicket.value.id}/close`, {
+        onSuccess: () => {
+            showConfirmModal.value = false
+            selectedTicket.value = null
+        }
+    })
+}
+
+const submitReopen = () => {
+    if (!confirmForm.reason || confirmForm.reason.length < 10) {
+        Swal.fire({
+            title: 'Alasan Kurang Jelas',
+            text: 'Mohon masukkan alasan mengapa kendala belum teratasi (minimal 10 karakter).',
+            icon: 'warning',
+            confirmButtonColor: '#ef4444', // red-500
+        })
+        return
+    }
+    
+    confirmForm.post(`/admin/tickets/${selectedTicket.value.id}/reopen`, {
+        onSuccess: () => {
+            showConfirmModal.value = false
+            selectedTicket.value = null
+            confirmForm.reset()
+            
+            Swal.fire({
+                title: 'Tiket Dibuka Kembali',
+                text: 'Tiket telah berhasil dibuka kembali untuk ditindaklanjuti.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            })
+        }
+    })
 }
 
 const formatDate = (dateString) => {
@@ -255,8 +317,8 @@ const getRowClasses = (ticket) => {
                                 {{ formatDate(ticket.updated_at) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <Link
-                                    :href="getActionUrl(ticket, getActionType(ticket).type)"
+                                <button
+                                    @click="handleAction(ticket)"
                                     :class="[
                                         'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors shadow-sm',
                                         getButtonClasses(getActionType(ticket).color)
@@ -264,7 +326,7 @@ const getRowClasses = (ticket) => {
                                 >
                                     <component :is="getActionType(ticket).icon" class="w-4 h-4" />
                                     {{ getActionType(ticket).label }}
-                                </Link>
+                                </button>
                             </td>
                         </tr>
 
@@ -309,6 +371,71 @@ const getRowClasses = (ticket) => {
                         >
                             Selanjutnya →
                         </Link>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div v-if="showConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="showConfirmModal = false"></div>
+            
+            <!-- Modal Content -->
+            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <CheckCircle class="w-6 h-6 text-green-600" />
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Konfirmasi Penyelesaian</h3>
+                        </div>
+                        <button @click="showConfirmModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <X class="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="text-gray-600 mb-4">
+                            Apakah kendala pada tiket <span class="font-mono font-bold text-blue-600">{{ selectedTicket?.ticket_number }}</span> sudah teratasi dengan baik?
+                        </p>
+                        
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Solusi dari Teknisi:</h4>
+                            <p class="text-gray-700 italic">"{{ selectedTicket?.resolution || 'Tidak ada catatan solusi' }}"</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Catatan Tambahan (Opsional, wajib diisi jika membuka kembali)
+                            </label>
+                            <textarea
+                                v-model="confirmForm.reason"
+                                rows="3"
+                                class="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+                                placeholder="Tuliskan alasan jika masalah belum selesai..."
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button
+                            @click="submitClose"
+                            :disabled="confirmForm.processing"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-200 disabled:opacity-50"
+                        >
+                            <CheckCircle class="w-5 h-5" />
+                            Ya, Masalah Selesai
+                        </button>
+                        <button
+                            @click="submitReopen"
+                            :disabled="confirmForm.processing"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-red-600 border-2 border-red-100 font-bold rounded-xl hover:bg-red-50 hover:border-red-200 transition-all disabled:opacity-50"
+                        >
+                            <X class="w-5 h-5" />
+                            Belum, Buka Kembali
+                        </button>
                     </div>
                 </div>
             </div>

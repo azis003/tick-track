@@ -138,6 +138,8 @@ class RoleSeeder extends Seeder
             'tickets.view-all',
             'tickets.triage',
             'tickets.assign',
+            'tickets.work',        // Added: untuk self-handle
+            'tickets.resolve',     // Added: untuk menyelesaikan tiket
             'tickets.close',
             'comments.create',
             'attachments.create',

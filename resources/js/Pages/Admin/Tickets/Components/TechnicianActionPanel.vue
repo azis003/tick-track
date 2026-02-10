@@ -2,6 +2,7 @@
 import { useForm } from '@inertiajs/vue3'
 import { CheckCircle, ArrowLeft, AlertCircle } from 'lucide-vue-next'
 import { ref } from 'vue'
+import Swal from 'sweetalert2'
 
 /**
  * TechnicianActionPanel Component
@@ -21,13 +22,25 @@ const returnForm = useForm({
     reason: ''
 })
 
-const acceptTicket = () => {
-    if (confirm('Anda yakin ingin mulai mengerjakan tiket ini?')) {
-        useForm({}).post(`/admin/tickets/${props.ticket.id}/accept`, {
-            preserveScroll: true,
-            onSuccess: () => emit('close')
-        })
-    }
+const startWork = () => {
+    Swal.fire({
+        title: 'Mulai Kerjakan?',
+        text: 'Anda akan menandai tiket ini sebagai sedang dikerjakan.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#059669', // green-600
+        cancelButtonColor: '#6b7280', // gray-500
+        confirmButtonText: 'Ya, Mulai!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            useForm({}).post(`/admin/tickets/${props.ticket.id}/accept`, {
+                preserveScroll: true,
+                onSuccess: () => emit('close')
+            })
+        }
+    })
 }
 
 const submitReturn = () => {
@@ -59,7 +72,7 @@ const submitReturn = () => {
                     Tiket ini telah ditugaskan kepada Anda. Klik tombol di bawah untuk mulai mengerjakan.
                 </p>
                 <button
-                    @click="acceptTicket"
+                    @click="startWork"
                     class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                     <CheckCircle class="w-5 h-5" />

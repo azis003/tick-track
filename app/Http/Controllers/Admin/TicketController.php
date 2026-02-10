@@ -219,7 +219,9 @@ class TicketController extends Controller implements HasMiddleware
             'finalPriority',
             'assignedTo',
             'assignedBy',
-            'logs.user',
+            'logs' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+            },
             'comments.user',
             'comments.attachments',
             'attachments.user',
