@@ -1,6 +1,6 @@
 <script setup>
-import { Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Link, usePage, useForm } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import StatusBadge from './StatusBadge.vue'
 import PriorityBadge from './PriorityBadge.vue'
 import Pagination from '@/Shared/Pagination.vue'
@@ -11,7 +11,6 @@ import { Eye } from 'lucide-vue-next'
  * Tabel data tiket dengan pagination
  */
 const props = defineProps({
-// ... existing props ...
     tickets: {
         type: Object,
         required: true
@@ -27,11 +26,38 @@ const props = defineProps({
     showAssignee: {
         type: Boolean,
         default: false
+    },
+    highlightActionRequired: {
+        type: Boolean,
+        default: false
+    },
+    highlightTriageRequired: {
+        type: Boolean,
+        default: false
+    },
+    showWorkAction: {
+        type: Boolean,
+        default: false
     }
 })
 
 const page = usePage()
 const auth = computed(() => page.props.auth)
+
+// Modal state for confirmation (if needed by parent)
+const showConfirmModal = ref(false)
+const selectedTicket = ref(null)
+const confirmForm = useForm({
+    reason: ''
+})
+
+const submitClose = () => {
+    // Implement or emit to parent
+}
+
+const submitReopen = () => {
+    // Implement or emit to parent
+}
 
 // Check if user can triage
 const canTriage = computed(() => {

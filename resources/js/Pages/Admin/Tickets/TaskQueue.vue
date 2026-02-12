@@ -31,7 +31,6 @@ import Pagination from '@/Shared/Pagination.vue'
 
 // props
 const props = defineProps({
-// ... existing props ...
     tickets: {
         type: Object,
         required: true
