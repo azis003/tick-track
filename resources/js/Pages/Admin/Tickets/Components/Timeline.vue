@@ -10,12 +10,18 @@ import {
     Send,
     XCircle,
     RotateCcw,
-    AlertCircle
+    AlertCircle,
+    UserCheck,
+    ShieldCheck,
+    ShieldX
 } from 'lucide-vue-next'
 
 /**
  * Timeline Component
- * Menampilkan timeline perubahan status tiket dari logs
+ * Menampilkan riwayat tiket (histori keluhan) dengan format:
+ * [Icon] Deskripsi aksi .............. Waktu & Oleh Siapa
+ *   |
+ * [Icon] Deskripsi aksi .............. Waktu & Oleh Siapa
  */
 const props = defineProps({
     logs: {
@@ -25,73 +31,98 @@ const props = defineProps({
     }
 })
 
+// Icon per action
 const actionIcons = {
     create: PlusCircle,
     triage: CheckCircle,
     assign: ArrowRight,
+    self_handle: UserCheck,
+    accept: UserCheck,
     start: Play,
     pending: Pause,
     resume: Play,
     resolve: CheckCircle,
-    close: XCircle,
+    close: CheckCircle,
     reopen: RotateCcw,
     auto_close: Clock,
     return: RotateCcw,
     request_approval: Send,
-    approve: CheckCircle,
-    reject: XCircle,
-    approval_approved: CheckCircle,
-    approval_rejected: XCircle,
+    approve: ShieldCheck,
+    reject: ShieldX,
+    approval_approved: ShieldCheck,
+    approval_rejected: ShieldX,
 }
 
-const actionColors = {
-    create: 'text-blue-500 bg-blue-100',
-    triage: 'text-purple-500 bg-purple-100',
-    assign: 'text-indigo-500 bg-indigo-100',
-    start: 'text-yellow-500 bg-yellow-100',
-    pending: 'text-orange-500 bg-orange-100',
-    resume: 'text-yellow-500 bg-yellow-100',
-    resolve: 'text-green-500 bg-green-100',
-    close: 'text-gray-500 bg-gray-100',
-    reopen: 'text-red-500 bg-red-100',
-    auto_close: 'text-gray-500 bg-gray-100',
-    return: 'text-orange-500 bg-orange-100',
-    request_approval: 'text-pink-500 bg-pink-100',
-    approve: 'text-green-500 bg-green-100',
-    reject: 'text-red-500 bg-red-100',
-    approval_approved: 'text-green-500 bg-green-100',
-    approval_rejected: 'text-red-500 bg-red-100',
+// Warna icon per action — dipisah text & bg agar bisa dipakai di border juga
+const actionStyles = {
+    create: { text: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
+    triage: { text: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
+    assign: { text: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    self_handle: { text: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    accept: { text: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
+    start: { text: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' },
+    pending: { text: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
+    resume: { text: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' },
+    resolve: { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+    close: { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+    reopen: { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
+    auto_close: { text: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' },
+    return: { text: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
+    request_approval: { text: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-200' },
+    approve: { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+    reject: { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
+    approval_approved: { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+    approval_rejected: { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
 }
 
-const actionLabels = {
-    create: 'Tiket Dibuat',
-    triage: 'Tiket Diverifikasi',
-    assign: 'Ditugaskan',
-    start: 'Mulai Dikerjakan',
-    pending: 'Set Pending',
-    resume: 'Dilanjutkan',
-    resolve: 'Diselesaikan',
-    close: 'Ditutup',
-    reopen: 'Dibuka Kembali',
-    auto_close: 'Ditutup Otomatis',
-    return: 'Dikembalikan',
-    request_approval: 'Minta Persetujuan',
-    approve: 'Disetujui',
-    reject: 'Ditolak',
-    approval_approved: 'Approval Disetujui',
-    approval_rejected: 'Approval Ditolak',
+const defaultStyle = { text: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' }
+
+/**
+ * Generate deskripsi singkat berdasarkan action
+ * Format simpel: "Tiket dibuat", "Tiket diverifikasi", "Tiket dikerjakan"
+ */
+const getDescription = (log) => {
+    switch (log.action) {
+        case 'create':          return 'Tiket dibuat'
+        case 'triage':          return 'Tiket diverifikasi'
+        case 'assign':          return 'Tiket ditugaskan'
+        case 'self_handle':     return 'Tiket dikerjakan'
+        case 'accept':          return 'Tiket diterima'
+        case 'start':           return 'Tiket dikerjakan'
+        case 'pending':
+            return log.to_status === 'pending_user'
+                ? 'Menunggu respon pelapor'
+                : 'Menunggu pihak eksternal'
+        case 'resume':          return 'Tiket dilanjutkan'
+        case 'resolve':         return 'Tiket diselesaikan'
+        case 'close':           return 'Tiket ditutup'
+        case 'auto_close':      return 'Tiket ditutup otomatis'
+        case 'reopen':          return 'Tiket dibuka kembali'
+        case 'return':          return 'Tiket dikembalikan'
+        case 'request_approval': return 'Approval diajukan'
+        case 'approve':
+        case 'approval_approved': return 'Approval disetujui'
+        case 'reject':
+        case 'approval_rejected': return 'Approval ditolak'
+        default:                return log.action
+    }
 }
 
+/**
+ * Format tanggal ke format: 2026-02-12 12:22:21
+ */
 const formatDate = (dateString) => {
     if (!dateString) return '-'
     const date = new Date(dateString)
-    return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
+
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
 const sortedLogs = computed(() => {
@@ -101,48 +132,53 @@ const sortedLogs = computed(() => {
 
 <template>
     <div class="flow-root">
-        <ul role="list" class="-mb-8">
+        <ul role="list">
             <li v-for="(log, index) in sortedLogs" :key="log.id">
-                <div class="relative pb-8">
-                    <!-- Connector line -->
+                <div class="relative pb-6 last:pb-0">
+                    <!-- Connector line (vertical) -->
                     <span
                         v-if="index !== sortedLogs.length - 1"
-                        class="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                        class="absolute left-[18px] top-10 bottom-0 w-0.5 bg-gray-200"
                         aria-hidden="true"
                     />
 
-                    <div class="relative flex space-x-3">
-                        <!-- Icon -->
-                        <div>
-                            <span
+                    <!-- Row: Icon + Description + Timestamp -->
+                    <div class="relative flex items-start gap-4">
+                        <!-- Icon Circle -->
+                        <div class="flex-shrink-0 relative z-10">
+                            <div
                                 :class="[
-                                    actionColors[log.action] || 'text-gray-500 bg-gray-100',
-                                    'h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white'
+                                    (actionStyles[log.action] || defaultStyle).bg,
+                                    (actionStyles[log.action] || defaultStyle).border,
+                                    'w-9 h-9 rounded-full flex items-center justify-center border-2'
                                 ]"
                             >
                                 <component
                                     :is="actionIcons[log.action] || AlertCircle"
-                                    class="h-4 w-4"
+                                    :class="[
+                                        (actionStyles[log.action] || defaultStyle).text,
+                                        'w-4 h-4'
+                                    ]"
                                 />
-                            </span>
+                            </div>
                         </div>
 
-                        <!-- Content -->
-                        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                            <div>
-                                <p class="text-sm text-gray-900">
-                                    <span class="font-medium">{{ actionLabels[log.action] || log.action }}</span>
-                                    <span v-if="log.user" class="text-gray-500">
-                                        oleh {{ log.user.name }}
-                                    </span>
-                                </p>
-                                <p v-if="log.notes" class="mt-1 text-sm text-gray-500">
-                                    {{ log.notes }}
-                                </p>
-                            </div>
-                            <div class="whitespace-nowrap text-right text-sm text-gray-500">
+                        <!-- Info (stacked) -->
+                        <div class="flex-1 min-w-0 pt-1">
+                            <p
+                                :class="[
+                                    'text-sm font-semibold',
+                                    (actionStyles[log.action] || defaultStyle).text
+                                ]"
+                            >
+                                {{ getDescription(log) }}
+                            </p>
+                            <p v-if="log.user" class="text-xs text-gray-500 mt-0.5">
+                                Oleh {{ log.user.name }}
+                            </p>
+                            <p class="text-xs text-gray-400 mt-0.5">
                                 {{ formatDate(log.created_at) }}
-                            </div>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -150,9 +186,10 @@ const sortedLogs = computed(() => {
         </ul>
 
         <!-- Empty state -->
-        <div v-if="!logs || logs.length === 0" class="text-center py-6 text-gray-500">
-            <Clock class="mx-auto h-8 w-8 text-gray-400 mb-2" />
-            <p class="text-sm">Belum ada aktivitas</p>
+        <div v-if="!logs || logs.length === 0" class="text-center py-8 text-gray-400">
+            <Clock class="mx-auto h-10 w-10 text-gray-300 mb-3" />
+            <p class="text-sm font-medium">Belum ada riwayat</p>
+            <p class="text-xs mt-1">Aktivitas tiket akan tercatat di sini</p>
         </div>
     </div>
 </template>

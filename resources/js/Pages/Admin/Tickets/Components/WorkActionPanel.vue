@@ -39,7 +39,8 @@ const showApprovalModal = ref(false)
 // Forms
 const pendingForm = useForm({
     type: 'user',
-    reason: ''
+    reason: '',
+    attachments: []
 })
 
 const resolveForm = useForm({
@@ -117,6 +118,11 @@ const submitApproval = () => {
 const handleFileUpload = (event) => {
     const files = Array.from(event.target.files)
     resolveForm.evidence = files
+}
+
+const handlePendingFileUpload = (event) => {
+    const files = Array.from(event.target.files)
+    pendingForm.attachments = [...(pendingForm.attachments || []), ...files]
 }
 </script>
 
@@ -285,14 +291,52 @@ const handleFileUpload = (event) => {
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Alasan *</label>
                                     <textarea
                                         v-model="pendingForm.reason"
-                                        rows="3"
+                                        rows="5"
                                         placeholder="Jelaskan alasan pending..."
-                                        class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 resize-y"
                                         required
                                     ></textarea>
                                     <p v-if="pendingForm.errors.reason" class="mt-1 text-sm text-red-600">
                                         {{ pendingForm.errors.reason }}
                                     </p>
+                                </div>
+
+                                <!-- File Pendukung -->
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-700 mb-2">File Pendukung:</p>
+                                    <label class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:border-orange-400 hover:text-orange-600 cursor-pointer transition-colors bg-white">
+                                        <Upload class="w-4 h-4" />
+                                        <span>Pilih File</span>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            @change="handlePendingFileUpload"
+                                            class="hidden"
+                                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.zip"
+                                        />
+                                    </label>
+                                    <p class="mt-2 text-xs text-orange-500">
+                                        Tipe file yang dapat diupload: png, jpg, jpeg, pdf, docx, zip — maksimal 8MB
+                                    </p>
+
+                                    <!-- Attached files preview -->
+                                    <div v-if="pendingForm.attachments && pendingForm.attachments.length > 0" class="mt-3 flex flex-wrap gap-2">
+                                        <div 
+                                            v-for="(file, index) in pendingForm.attachments" 
+                                            :key="index" 
+                                            class="flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-lg text-xs text-orange-700"
+                                        >
+                                            <FileText class="w-3 h-3" />
+                                            <span>{{ file.name }}</span>
+                                            <button 
+                                                type="button"
+                                                @click="pendingForm.attachments.splice(index, 1)"
+                                                class="p-0.5 hover:text-red-500 transition-colors"
+                                            >
+                                                <X class="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Actions -->

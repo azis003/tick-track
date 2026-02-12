@@ -7,7 +7,7 @@ import {
     CheckCircle,
     XCircle,
     FileText,
-    DollarSign,
+    Wallet,
     User,
     Calendar,
     AlertTriangle
@@ -152,7 +152,7 @@ const submitReject = () => {
 
                         <!-- Estimated Cost -->
                         <div v-if="latestApproval.estimated_cost" class="flex items-start gap-3">
-                            <DollarSign class="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                            <Wallet class="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                             <div>
                                 <p class="text-xs text-gray-500">Estimasi Biaya</p>
                                 <p class="text-sm font-bold text-green-700">

@@ -506,7 +506,7 @@ const formatDate = (dateString) => {
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
                             <Clock class="w-4 h-4 text-blue-600" />
-                            Riwayat Aktivitas
+                            Riwayat Tiket
                         </h3>
                     </div>
                     <div class="p-6 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">

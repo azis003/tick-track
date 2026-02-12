@@ -153,63 +153,71 @@ const handleFileUpload = (event) => {
 
         <div class="p-6 space-y-6">
             <!-- Add Comment Form -->
-            <form v-if="canComment" @submit.prevent="submitComment" class="space-y-3">
+            <form v-if="canComment" @submit.prevent="submitComment" class="space-y-4">
+                <!-- Title -->
+                <h4 class="text-base font-semibold text-blue-700">Balas</h4>
+
+                <!-- Textarea -->
                 <div>
                     <textarea
                         v-model="commentForm.content"
-                        rows="3"
-                        placeholder="Tulis komentar..."
-                        class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                        rows="5"
+                        placeholder="Tulis balasan Anda di sini..."
+                        class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-y"
                     ></textarea>
                     <p v-if="commentForm.errors.content" class="mt-1 text-sm text-red-600">
                         {{ commentForm.errors.content }}
                     </p>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <!-- File attachment -->
-                        <label class="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">
-                            <Paperclip class="w-4 h-4" />
-                            <span>Lampirkan file</span>
-                            <input
-                                type="file"
-                                multiple
-                                @change="handleFileUpload"
-                                class="hidden"
-                                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.zip"
-                            />
-                        </label>
-                        
-                        <!-- Internal comment toggle (for staff only) -->
-                        <label v-if="canViewInternal()" class="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="commentForm.is_internal"
-                                class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                            />
-                            <Lock class="w-4 h-4" />
-                            <span>Internal</span>
-                        </label>
-                    </div>
+                <!-- File Pendukung -->
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 mb-2">File Pendukung:</p>
+                    <label class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 cursor-pointer transition-colors bg-white">
+                        <Paperclip class="w-4 h-4" />
+                        <span>Pilih File</span>
+                        <input
+                            type="file"
+                            multiple
+                            @change="handleFileUpload"
+                            class="hidden"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.zip"
+                        />
+                    </label>
+                    <p class="mt-2 text-xs text-blue-500">
+                        Tipe file yang dapat diupload: png, jpg, jpeg, pdf, docx, zip — maksimal 8MB
+                    </p>
 
+                    <!-- Attached files preview -->
+                    <div v-if="commentForm.attachments.length > 0" class="mt-3 flex flex-wrap gap-2">
+                        <div 
+                            v-for="(file, index) in commentForm.attachments" 
+                            :key="index" 
+                            class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700"
+                        >
+                            <Paperclip class="w-3 h-3" />
+                            <span>{{ file.name }}</span>
+                            <button 
+                                type="button"
+                                @click="commentForm.attachments.splice(index, 1)"
+                                class="p-0.5 hover:text-red-500 transition-colors"
+                            >
+                                <X class="w-3 h-3" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kirim Button -->
+                <div class="flex justify-end">
                     <button
                         type="submit"
                         :disabled="commentForm.processing || !commentForm.content.trim()"
-                        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        class="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                     >
                         <Send class="w-4 h-4" />
                         <span>{{ commentForm.processing ? 'Mengirim...' : 'Kirim' }}</span>
                     </button>
-                </div>
-
-                <!-- Attached files preview -->
-                <div v-if="commentForm.attachments.length > 0" class="flex flex-wrap gap-2">
-                    <div v-for="(file, index) in commentForm.attachments" :key="index" 
-                         class="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-600">
-                        <Paperclip class="w-3 h-3" />
-                        <span>{{ file.name }}</span>
-                    </div>
                 </div>
             </form>
 
