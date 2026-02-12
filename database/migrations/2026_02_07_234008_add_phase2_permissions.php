@@ -25,7 +25,7 @@ return new class extends Migration {
         }
 
         // Assign new permissions to teknisi role
-        $teknisi = Role::findByName('teknisi');
+        $teknisi = Role::where('name', 'teknisi')->first();
         if ($teknisi) {
             $teknisi->givePermissionTo($newPermissions);
         }
@@ -40,7 +40,7 @@ return new class extends Migration {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Remove permissions from teknisi role
-        $teknisi = Role::findByName('teknisi');
+        $teknisi = Role::where('name', 'teknisi')->first();
         if ($teknisi) {
             $teknisi->revokePermissionTo(['tickets.accept', 'tickets.view-assigned']);
         }
