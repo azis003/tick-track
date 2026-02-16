@@ -214,19 +214,19 @@ const getRowClasses = (ticket) => {
         <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <ClipboardList class="w-7 h-7 text-indigo-600" />
+                    <!-- <ClipboardList class="w-7 h-7 text-indigo-600" /> -->
                     Daftar Tugas
                 </h1>
-                <p class="text-sm text-gray-500 mt-1">
+                <!-- <p class="text-sm text-gray-500 mt-1">
                     Tiket yang memerlukan tindakan dari Anda
-                </p>
+                </p> -->
             </div>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2 text-sm text-gray-500">
                     <span class="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
                         <ClipboardCheck class="w-3 h-3" /> Verifikasi
                     </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
                         <Wrench class="w-3 h-3" /> Pengerjaan
                     </span>
                     <span class="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">
@@ -259,13 +259,13 @@ const getRowClasses = (ticket) => {
                                 Pelapor
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Waktu Melapor
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Prioritas
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Waktu
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi
@@ -279,28 +279,32 @@ const getRowClasses = (ticket) => {
                             :class="['hover:bg-gray-50 transition-colors', getRowClasses(ticket)]"
                         >
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <Link
+                                {{ ticket.ticket_number }}
+                                <!-- <Link
                                     :href="`/tickets/${ticket.id}`"
                                     class="text-blue-600 hover:text-blue-800 font-mono text-sm font-medium"
                                 >
                                     {{ ticket.ticket_number }}
-                                </Link>
+                                </Link> -->
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900 max-w-xs truncate">
                                     {{ ticket.title }}
                                 </div>
-                                <div class="text-xs text-gray-500">
+                                <!-- <div class="text-xs text-gray-500">
                                     {{ ticket.category?.name }}
-                                </div>
+                                </div> -->
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-600">
                                     {{ ticket.reporter?.name || ticket.created_by?.name || '-' }}
                                 </div>
-                                <div class="text-xs text-gray-400">
+                                <!-- <div class="text-xs text-gray-400">
                                     {{ ticket.reporter?.unit?.name || '-' }}
-                                </div>
+                                </div> -->
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ formatDate(ticket.updated_at) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <PriorityBadge
@@ -314,9 +318,6 @@ const getRowClasses = (ticket) => {
                                     :status="ticket.status"
                                     :label="statuses[ticket.status] || ticket.status"
                                 />
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ formatDate(ticket.updated_at) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <button
@@ -343,7 +344,7 @@ const getRowClasses = (ticket) => {
                                         Tidak ada tugas pending
                                     </h3>
                                     <p class="text-gray-500 text-sm">
-                                        Semua tugas sudah dikerjakan. Kerja bagus! 🎉
+                                        Semua tugas sudah dikerjakan.
                                     </p>
                                 </div>
                             </td>

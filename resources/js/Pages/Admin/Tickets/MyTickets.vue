@@ -42,9 +42,9 @@ const props = defineProps({
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     Tiket Saya
                 </h1>
-                <p class="text-sm text-gray-500 mt-1">
+                <!-- <p class="text-sm text-gray-500 mt-1">
                     Daftar tiket yang Anda buat
-                </p>
+                </p> -->
             </div>
             <Link
                 v-if="hasPermission('tickets.create')"

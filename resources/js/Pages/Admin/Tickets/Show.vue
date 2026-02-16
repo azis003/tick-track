@@ -162,40 +162,51 @@ const isActionMode = computed(() => {
 })
 
 // Dynamic back URL based on context and action mode
+const fromPage = computed(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    return urlParams.get('from')
+})
+
 const backUrl = computed(() => {
-    // If coming from action mode, determine back URL based on action type
-    if (actionMode.value === 'work') {
-        // Staff working on ticket - go back to Task Queue
+    // If coming from action mode, always go back to Task Queue
+    if (actionMode.value === 'work' || actionMode.value === 'triage' || actionMode.value === 'approve') {
         return '/tickets/task-queue'
     }
-    if (actionMode.value === 'triage') {
-        // Helpdesk triaging - go back to Task Queue
-        return '/tickets/task-queue'
-    }
-    if (actionMode.value === 'approve') {
-        // Manager reviewing approval - go back to Task Queue
-        return '/tickets/task-queue'
-    }
-    
-    // For regular view mode:
-    // Creator viewing their ticket - go to Tiket Saya
-    if (isCreator.value) {
-        return '/tickets/my-tickets'
-    }
-    // Staff viewing ticket (not action mode) - go to Task Queue
-    if (canTriage.value || isAssignedTechnician.value) {
-        return '/tickets/task-queue'
-    }
+
+    // Check `from` query param (set by TicketTable links)
+    if (fromPage.value === 'index') return '/tickets'
+    if (fromPage.value === 'my-tickets') return '/tickets/my-tickets'
+    if (fromPage.value === 'task-queue') return '/tickets/task-queue'
+    if (fromPage.value === 'unit') return '/tickets/unit'
+
+    // Fallback: guess based on user role
+    if (isCreator.value) return '/tickets/my-tickets'
+    if (canTriage.value || isAssignedTechnician.value) return '/tickets/task-queue'
     return '/tickets/my-tickets'
 })
 
-const formatDate = (dateString) => {
+const backLabel = computed(() => {
+    if (actionMode.value) return 'Kembali ke Daftar Tugas'
+    if (fromPage.value === 'index') return 'Kembali ke Semua Tiket'
+    if (fromPage.value === 'task-queue') return 'Kembali ke Daftar Tugas'
+    if (fromPage.value === 'unit') return 'Kembali ke Tiket Unit'
+    return 'Kembali ke Tiket Saya'
+})
+
+const formatDateOnly = (dateString) => {
     if (!dateString) return '-'
     const date = new Date(dateString)
     return date.toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'long',
-        year: 'numeric',
+        year: 'numeric'
+    })
+}
+
+const formatTimeOnly = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return 'Pukul ' + date.toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit'
     })
@@ -213,7 +224,7 @@ const formatDate = (dateString) => {
                 class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
                 <ArrowLeft class="w-4 h-4 mr-2" />
-                Kembali ke Daftar Tiket
+                {{ backLabel }}
             </Link>
         </div>
 
@@ -260,7 +271,8 @@ const formatDate = (dateString) => {
                                         <Calendar class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                                         <div>
                                             <p class="text-xs text-gray-500">Dibuat</p>
-                                            <p class="text-sm font-semibold text-gray-900">{{ formatDate(ticket.created_at) }}</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ formatDateOnly(ticket.created_at) }}</p>
+                                            <p class="text-xs text-gray-500">{{ formatTimeOnly(ticket.created_at) }}</p>
                                         </div>
                                     </div>
 
@@ -459,7 +471,8 @@ const formatDate = (dateString) => {
                                         <Calendar class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                                         <div>
                                             <p class="text-xs text-gray-500">Dibuat</p>
-                                            <p class="text-sm font-semibold text-gray-900">{{ formatDate(ticket.created_at) }}</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ formatDateOnly(ticket.created_at) }}</p>
+                                            <p class="text-xs text-gray-500">{{ formatTimeOnly(ticket.created_at) }}</p>
                                         </div>
                                     </div>
 
@@ -562,7 +575,7 @@ const formatDate = (dateString) => {
                                 {{ ticket.resolution }}
                             </p>
                             <p v-if="ticket.resolved_at" class="text-xs text-gray-400 mt-3">
-                                Diselesaikan: {{ formatDate(ticket.resolved_at) }}
+                                Diselesaikan: {{ formatDateOnly(ticket.resolved_at) }} {{ formatTimeOnly(ticket.resolved_at) }}
                             </p>
                         </div>
 

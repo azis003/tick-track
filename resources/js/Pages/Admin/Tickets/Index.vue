@@ -48,12 +48,12 @@ const props = defineProps({
         <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <LayoutGrid class="w-7 h-7 text-blue-600" />
+                    <!-- <LayoutGrid class="w-7 h-7 text-blue-600" /> -->
                     Semua Tiket
                 </h1>
-                <p class="text-sm text-gray-500 mt-1">
+                <!-- <p class="text-sm text-gray-500 mt-1">
                     Lihat semua tiket dalam sistem (read-only)
-                </p>
+                </p> -->
             </div>
             <Link
                 v-if="hasPermission('tickets.create')"
@@ -80,6 +80,7 @@ const props = defineProps({
             :statuses="statuses"
             :show-reporter="true"
             :show-assignee="true"
+            from="index"
         />
     </LayoutAdmin>
 </template>
