@@ -37,7 +37,7 @@ class TicketController extends Controller implements HasMiddleware
         return [
             // Phase 1: View & Create
             new Middleware('permission:tickets.view-all', only: ['index']),
-            new Middleware('permission:tickets.view-own', only: ['myTickets', 'show']),
+            new Middleware('permission:tickets.view-own', only: ['myTickets']),
             new Middleware('permission:tickets.view-unit', only: ['unitTickets']),
             new Middleware('permission:tickets.create', only: ['create', 'store']),
             // Phase 2: Triage & Assignment
@@ -203,6 +203,8 @@ class TicketController extends Controller implements HasMiddleware
         // Authorization: check if user can view this ticket
         $user = auth()->user();
         $canView = $user->can('tickets.view-all')
+            || $user->can('tickets.triage')
+            || $user->can('tickets.approve')
             || $ticket->reporter_id === $user->id
             || $ticket->created_by_id === $user->id
             || $ticket->assigned_to_id === $user->id;
@@ -517,9 +519,16 @@ class TicketController extends Controller implements HasMiddleware
             return back()->with('error', 'Tiket tidak dalam status menunggu approval.');
         }
 
+        $request->validate([
+            'decision_notes' => 'required|string|min:10|max:2000',
+        ], [
+            'decision_notes.required' => 'Catatan approval wajib diisi.',
+            'decision_notes.min' => 'Catatan approval minimal 10 karakter.',
+        ]);
+
         $this->ticketService->approveTicket(
             $ticket,
-            $request->input('decision_notes') ?? '',
+            $request->input('decision_notes'),
             $user
         );
 

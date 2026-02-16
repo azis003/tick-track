@@ -485,7 +485,7 @@ class DashboardController extends Controller
             'assigned' => 'Ditugaskan',
             'in_progress' => 'Dalam Proses',
             'pending_user' => 'Pending User',
-            'pending_external' => 'Pending Vendor',
+            'pending_external' => 'Pending Eksternal',
             'waiting_approval' => 'Menunggu Approval',
             'resolved' => 'Selesai',
             'closed' => 'Ditutup',

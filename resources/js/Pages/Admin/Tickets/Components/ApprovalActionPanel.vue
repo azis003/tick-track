@@ -78,7 +78,19 @@ const formatDate = (dateString) => {
 const submitApprove = () => {
     Swal.fire({
         title: 'Setujui Permintaan?',
-        text: 'Anda akan menyetujui permintaan ini. Tiket akan dilanjutkan ke proses pengerjaan.',
+        html: '<p class="text-sm text-gray-600 mb-3">Anda akan menyetujui permintaan ini. Tiket akan dilanjutkan ke proses pengerjaan.</p>',
+        input: 'textarea',
+        inputLabel: 'Catatan Keputusan *',
+        inputPlaceholder: 'Masukkan catatan keputusan approval Anda...',
+        inputAttributes: {
+            'aria-label': 'Catatan keputusan',
+            rows: 4
+        },
+        inputValidator: (value) => {
+            if (!value || value.trim().length < 10) {
+                return 'Catatan keputusan wajib diisi minimal 10 karakter.'
+            }
+        },
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#059669',
@@ -88,6 +100,7 @@ const submitApprove = () => {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
+            approveForm.decision_notes = result.value
             approveForm.post(`/tickets/${props.ticket.id}/approve`, {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -191,19 +204,6 @@ const submitReject = () => {
                     <div class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap leading-relaxed border border-gray-100">
                         {{ latestApproval.request_reason || '-' }}
                     </div>
-                </div>
-
-                <!-- Catatan Approval (opsional) -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Catatan Keputusan (opsional)
-                    </label>
-                    <textarea
-                        v-model="approveForm.decision_notes"
-                        rows="2"
-                        placeholder="Tambahkan catatan jika diperlukan..."
-                        class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
-                    ></textarea>
                 </div>
 
                 <!-- Action Buttons -->

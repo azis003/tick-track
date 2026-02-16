@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Ticket;
 use App\Models\TicketLog;
 use App\Models\TicketAttachment;
+use App\Models\TicketComment;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -572,6 +573,16 @@ class TicketService
                 $approver
             );
 
+            // Auto-create comment so technician can see the approval note
+            if ($decisionNotes) {
+                TicketComment::create([
+                    'ticket_id' => $ticket->id,
+                    'user_id' => $approver->id,
+                    'content' => "[Approval Disetujui]\n\n" . $decisionNotes,
+                    'is_internal' => false,
+                ]);
+            }
+
             return $ticket->fresh();
         });
     }
@@ -607,6 +618,16 @@ class TicketService
                 $decisionNotes,
                 $approver
             );
+
+            // Auto-create comment so technician can see the rejection note
+            if ($decisionNotes) {
+                TicketComment::create([
+                    'ticket_id' => $ticket->id,
+                    'user_id' => $approver->id,
+                    'content' => "[Approval Ditolak]\n\n" . $decisionNotes,
+                    'is_internal' => false,
+                ]);
+            }
 
             return $ticket->fresh();
         });

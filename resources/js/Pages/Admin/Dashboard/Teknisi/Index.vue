@@ -63,7 +63,7 @@ const getStatusLabel = (status) => {
         'assigned': 'Ditugaskan',
         'in_progress': 'Dalam Proses',
         'pending_user': 'Pending User',
-        'pending_external': 'Pending Vendor',
+        'pending_external': 'Pending Eksternal',
         'waiting_approval': 'Menunggu Approval',
     };
     return labels[status] || status;

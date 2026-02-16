@@ -45,7 +45,7 @@ class Ticket extends Model
         self::STATUS_ASSIGNED => 'Ditugaskan',
         self::STATUS_IN_PROGRESS => 'Dalam Proses',
         self::STATUS_PENDING_USER => 'Pending User',
-        self::STATUS_PENDING_EXTERNAL => 'Pending Vendor',
+        self::STATUS_PENDING_EXTERNAL => 'Pending Eksternal',
         self::STATUS_WAITING_APPROVAL => 'Menunggu Approval',
         self::STATUS_RESOLVED => 'Selesai',
         self::STATUS_CLOSED => 'Ditutup',
