@@ -501,7 +501,7 @@ const formatDate = (dateString) => {
 
             <!-- Sidebar (Column 2) -->
             <div class="lg:col-span-4">
-                <!-- Card 1: Riwayat Aktivitas -->
+                <!-- Card 1: Riwayat Tiket -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
