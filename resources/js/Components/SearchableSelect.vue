@@ -160,11 +160,6 @@ onUnmounted(() => {
                             :class="{ 'bg-blue-50/50': modelValue === option.id }"
                         >
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 mr-3">
-                                    <div class="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
-                                        <User class="h-4 w-4 text-gray-500 group-hover:text-blue-600" />
-                                    </div>
-                                </div>
                                 <div class="flex flex-col min-w-0">
                                     <span class="block truncate text-sm font-semibold" :class="modelValue === option.id ? 'text-blue-700' : 'text-gray-900'">
                                         {{ option.label }}

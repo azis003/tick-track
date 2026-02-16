@@ -165,12 +165,9 @@ const formatDate = (dateString) => {
                         ]"
                     >
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <Link
-                                :href="`/admin/tickets/${ticket.id}`"
-                                class="text-blue-600 hover:text-blue-800 font-mono text-sm font-medium"
-                            >
+                            <span class="text-sm text-gray-600">
                                 {{ ticket.ticket_number }}
-                            </Link>
+                            </span>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-900 line-clamp-2 max-w-xs">
