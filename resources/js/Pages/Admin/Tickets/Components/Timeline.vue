@@ -91,7 +91,7 @@ const getDescription = (log) => {
         case 'start':           return 'Tiket dikerjakan'
         case 'pending':
             return log.to_status === 'pending_user'
-                ? 'Menunggu respon pelapor'
+                ? 'Dikembalikan kepelapor'
                 : 'Menunggu pihak eksternal'
         case 'resume':          return 'Tiket dilanjutkan'
         case 'resolve':         return 'Tiket diselesaikan'
