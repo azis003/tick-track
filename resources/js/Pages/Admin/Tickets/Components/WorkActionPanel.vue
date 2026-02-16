@@ -4,9 +4,9 @@ import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 import { 
     PlayCircle, 
-    PauseCircle, 
+    // PauseCircle, 
     CheckCircle, 
-    Clock, 
+    SquareArrowLeft, 
     AlertTriangle,
     ExternalLink,
     FileText,
@@ -130,9 +130,9 @@ const handlePendingFileUpload = (event) => {
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div class="flex items-center gap-2">
-                <div class="p-1.5 bg-blue-100 rounded-lg">
+                <!-- <div class="p-1.5 bg-blue-100 rounded-lg">
                     <PlayCircle class="w-4 h-4 text-blue-600" />
-                </div>
+                </div> -->
                 <h3 class="font-medium text-gray-900">Panel Pengerjaan</h3>
             </div>
         </div>
@@ -149,7 +149,7 @@ const handlePendingFileUpload = (event) => {
                     @click="showPendingModal = true"
                     class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-orange-300 text-orange-700 rounded-lg hover:bg-orange-50 transition-colors"
                 >
-                    <PauseCircle class="w-5 h-5" />
+                    <!-- <PauseCircle class="w-5 h-5" /> -->
                     <span>Set Pending</span>
                 </button>
 
@@ -158,16 +158,16 @@ const handlePendingFileUpload = (event) => {
                     @click="showApprovalModal = true"
                     class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors"
                 >
-                    <AlertTriangle class="w-5 h-5" />
+                    <!-- <AlertTriangle class="w-5 h-5" /> -->
                     <span>Minta Approval</span>
                 </button>
 
                 <!-- Resolve Button -->
                 <button
                     @click="showResolveModal = true"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-green-300 text-green-700 rounded-lg hover:bg-purple-50 transition-colors"
                 >
-                    <CheckCircle class="w-5 h-5" />
+                    <!-- <CheckCircle class="w-5 h-5" /> -->
                     <span>Selesaikan Tiket</span>
                 </button>
             </div>
@@ -201,7 +201,7 @@ const handlePendingFileUpload = (event) => {
                     @click="showResolveModal = true"
                     class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-green-300 text-green-700 rounded-lg hover:bg-green-50 transition-colors"
                 >
-                    <CheckCircle class="w-5 h-5" />
+                    <!-- <CheckCircle class="w-5 h-5" /> -->
                     <span>Selesaikan Tiket</span>
                 </button>
             </div>
@@ -239,9 +239,9 @@ const handlePendingFileUpload = (event) => {
                             <!-- Header -->
                             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <div class="p-1.5 bg-orange-100 rounded-lg">
+                                    <!-- <div class="p-1.5 bg-orange-100 rounded-lg">
                                         <PauseCircle class="w-4 h-4 text-orange-600" />
-                                    </div>
+                                    </div> -->
                                     <h3 class="text-lg font-semibold text-gray-900">Set Pending</h3>
                                 </div>
                                 <button @click="showPendingModal = false" class="p-1 hover:bg-gray-100 rounded-lg">
@@ -265,9 +265,9 @@ const handlePendingFileUpload = (event) => {
                                                     : 'border-gray-200 hover:border-gray-300'
                                             ]"
                                         >
-                                            <Clock class="w-5 h-5 text-orange-500 mb-1" />
-                                            <p class="font-medium text-sm">Pending User</p>
-                                            <p class="text-xs text-gray-500">Menunggu info dari user</p>
+                                            <SquareArrowLeft class="w-5 h-5 text-orange-500 mb-1" />
+                                            <p class="font-medium text-sm">Kembalikan ke Pelapor</p>
+                                            <!-- <p class="text-xs text-gray-500">Menunggu info dari user</p> -->
                                         </button>
                                         <button
                                             type="button"
@@ -280,8 +280,8 @@ const handlePendingFileUpload = (event) => {
                                             ]"
                                         >
                                             <ExternalLink class="w-5 h-5 text-orange-500 mb-1" />
-                                            <p class="font-medium text-sm">Pending Vendor</p>
-                                            <p class="text-xs text-gray-500">Menunggu pihak eksternal</p>
+                                            <p class="font-medium text-sm">Menunggu Pihak Eksternal</p>
+                                            <!-- <p class="text-xs text-gray-500">Menunggu pihak eksternal</p> -->
                                         </button>
                                     </div>
                                 </div>
@@ -380,9 +380,9 @@ const handlePendingFileUpload = (event) => {
                             <!-- Header -->
                             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <div class="p-1.5 bg-green-100 rounded-lg">
+                                    <!-- <div class="p-1.5 bg-green-100 rounded-lg">
                                         <CheckCircle class="w-4 h-4 text-green-600" />
-                                    </div>
+                                    </div> -->
                                     <h3 class="text-lg font-semibold text-gray-900">Selesaikan Tiket</h3>
                                 </div>
                                 <button @click="showResolveModal = false" class="p-1 hover:bg-gray-100 rounded-lg">
@@ -398,7 +398,7 @@ const handlePendingFileUpload = (event) => {
                                     <textarea
                                         v-model="resolveForm.resolution"
                                         rows="5"
-                                        placeholder="Jelaskan langkah-langkah penyelesaian yang dilakukan..."
+                                        placeholder="Jelaskan langkah-langkah penyelesaian yang dilakukan (min. 20 karakter)"
                                         class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
                                         required
                                     ></textarea>
@@ -476,9 +476,9 @@ const handlePendingFileUpload = (event) => {
                             <!-- Header -->
                             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <div class="p-1.5 bg-purple-100 rounded-lg">
+                                    <!-- <div class="p-1.5 bg-purple-100 rounded-lg">
                                         <AlertTriangle class="w-4 h-4 text-purple-600" />
-                                    </div>
+                                    </div> -->
                                     <h3 class="text-lg font-semibold text-gray-900">Minta Approval</h3>
                                 </div>
                                 <button @click="showApprovalModal = false" class="p-1 hover:bg-gray-100 rounded-lg">

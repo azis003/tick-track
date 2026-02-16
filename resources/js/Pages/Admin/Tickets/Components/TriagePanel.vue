@@ -74,9 +74,9 @@ const getPriorityColor = (color) => {
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
             <div class="flex items-center gap-2">
-                <div class="p-1.5 bg-purple-100 rounded-lg">
+                <!-- <div class="p-1.5 bg-purple-100 rounded-lg">
                     <AlertTriangle class="w-4 h-4 text-purple-600" />
-                </div>
+                </div> -->
                 <h3 class="font-medium text-gray-900">Verifikasi & Penugasan</h3>
             </div>
         </div>

@@ -15,7 +15,12 @@ import {
     Tag,
     Clock,
     Paperclip,
-    MessageSquare
+    MessageSquare,
+    Phone,
+    Mail,
+    Shield,
+    FileText,
+    CheckCircle
 } from 'lucide-vue-next'
 
 // import components
@@ -217,103 +222,142 @@ const formatDate = (dateString) => {
             <!-- Column 1: Ticket Details Only -->
             <div class="lg:col-span-7">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50 flex items-start justify-between">
-                        <div class="flex items-center">
-                            <div class="p-2 bg-blue-100 rounded-lg mr-3">
-                                <Ticket class="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <span class="text-sm font-mono text-blue-600">
-                                    {{ ticket.ticket_number }}
-                                </span>
-                                <h1 class="text-xl font-semibold text-gray-900 mt-1">
-                                    {{ ticket.title }}
-                                </h1>
-                            </div>
-                        </div>
-                        <StatusBadge
-                            :status="ticket.status"
-                            :label="statuses[ticket.status] || ticket.status"
-                        />
+                    <!-- Header: Judul Tiket -->
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h1 class="text-xl font-semibold text-gray-900">
+                            {{ ticket.title }}
+                        </h1>
                     </div>
 
                     <div class="p-6 space-y-8">
-                        <!-- Meta Info Grid -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Kategori</p>
-                                <p class="text-sm font-medium text-gray-900 flex items-center gap-1">
-                                    <Tag class="w-4 h-4 text-gray-400" />
-                                    {{ ticket.category?.name || '-' }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Prioritas</p>
-                                <PriorityBadge
-                                    v-if="ticket.final_priority || ticket.user_priority"
-                                    :priority="ticket.final_priority || ticket.user_priority"
-                                />
-                                <span v-else class="text-sm text-gray-400">-</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Ditugaskan</p>
-                                <p class="text-sm text-gray-900 flex items-center gap-1">
-                                    <User class="w-4 h-4 text-gray-400" />
-                                    {{ ticket.assigned_to?.name || '-' }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Dibuat</p>
-                                <p class="text-sm text-gray-900 flex items-center gap-1">
-                                    <Calendar class="w-4 h-4 text-gray-400" />
-                                    {{ formatDate(ticket.created_at) }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Deskripsi -->
-                        <div>
-                            <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 mb-2">Deskripsi Tiket</h3>
-                            <div class="p-4 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap leading-relaxed border border-gray-100">
-                                {{ ticket.description }}
-                            </div>
-                        </div>
-
-                        <!-- Pending Reason (if applicable) -->
-                        <div v-if="ticket.pending_reason" class="p-4 bg-orange-50 rounded-lg border border-orange-100">
-                            <h3 class="text-sm font-medium text-orange-800 mb-2 flex items-center gap-2">
-                                <Clock class="w-4 h-4" />
-                                Alasan Pending
-                            </h3>
-                            <p class="text-sm text-orange-700">{{ ticket.pending_reason }}</p>
-                        </div>
-
-                        <!-- Pelapor Info -->
-                        <div class="pt-6 border-t border-gray-100">
-                            <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 tracking-widest">Informasi Pelapor</h3>
-                            <div class="flex items-center gap-4 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                                    <span class="text-blue-600 font-bold text-lg">
-                                        {{ ticket.reporter?.name?.charAt(0) || '?' }}
+                        <!-- 1. Nomor Tiket (Kiri) + Info Detail (Kanan) -->
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <!-- Nomor Tiket Card -->
+                            <div class="flex-shrink-0">
+                                <div class="w-48 h-36 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex flex-col items-center justify-center text-white shadow-lg">
+                                    <Ticket class="w-8 h-8 mb-2 opacity-80" />
+                                    <span class="text-2xl font-bold font-mono tracking-wider">
+                                        {{ ticket.ticket_number }}
                                     </span>
+                                    <span class="text-xs mt-1 text-blue-100">Nomor Tiket</span>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-gray-900">{{ ticket.reporter?.name }}</p>
-                                    <p class="text-sm text-gray-500 flex items-center gap-1">
-                                        <Tag class="w-3 h-3" />
-                                        {{ ticket.reporter?.unit?.name || '-' }}
-                                    </p>
+                            </div>
+
+                            <!-- Detail Info Grid -->
+                            <div class="flex-1">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                                    <!-- Pelapor -->
+                                    <div class="flex items-start gap-3">
+                                        <User class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Pelapor</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.reporter?.name || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dibuat -->
+                                    <div class="flex items-start gap-3">
+                                        <Calendar class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Dibuat</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ formatDate(ticket.created_at) }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nomor Telepon -->
+                                    <div class="flex items-start gap-3">
+                                        <Phone class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Nomor Telepon</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.reporter?.phone || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="flex items-start gap-3">
+                                        <Mail class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Email</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.reporter?.email || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Kategori -->
+                                    <div class="flex items-start gap-3">
+                                        <Tag class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Kategori</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.category?.name || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dampak / Urgensi -->
+                                    <div class="flex items-start gap-3">
+                                        <Shield class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Dampak / Urgensi</p>
+                                            <PriorityBadge
+                                                v-if="ticket.final_priority || ticket.user_priority"
+                                                :priority="ticket.final_priority || ticket.user_priority"
+                                            />
+                                            <span v-else class="text-sm text-gray-400">-</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="flex items-start gap-3">
+                                        <Clock class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Status</p>
+                                            <StatusBadge
+                                                :status="ticket.status"
+                                                :label="statuses[ticket.status] || ticket.status"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Petugas -->
+                                    <div class="flex items-start gap-3">
+                                        <User class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Petugas</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.assigned_to?.name || 'Belum ditugaskan' }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Lampiran -->
-                        <div v-if="ticket.attachments?.length > 0" class="pt-6 border-t border-gray-100">
-                            <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 flex items-center justify-between tracking-widest">
-                                Lampiran File
-                                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                                    {{ ticket.attachments?.length || 0 }} FILES
-                                </span>
+                        <!-- Divider -->
+                        <hr class="border-gray-100" />
+
+                        <!-- 2. Deskripsi Tiket -->
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4 flex items-center gap-2">
+                                <FileText class="w-4 h-4 text-gray-500" />
+                                Deskripsi Tiket
+                            </h3>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                {{ ticket.description }}
+                            </p>
+                        </div>
+
+                        <!-- Pending Reason -->
+                        <div v-if="ticket.pending_reason">
+                            <hr class="border-gray-100 mb-6" />
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-orange-700 mb-4 flex items-center gap-2">
+                                <Clock class="w-4 h-4" />
+                                Sedang Pending
+                            </h3>
+                            <p class="text-sm text-orange-600">{{ ticket.pending_reason }}</p>
+                        </div>
+
+                        <!-- Bukti Dukung Penyelesaian Tiket -->
+                        <div>
+                            <hr class="border-gray-100 mb-6" />
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4 flex items-center gap-2">
+                                <Paperclip class="w-4 h-4 text-gray-500" />
+                                Bukti Dukung Penyelesaian Tiket
                             </h3>
                             <AttachmentList :attachments="ticket.attachments || []" />
                         </div>
@@ -326,6 +370,7 @@ const formatDate = (dateString) => {
                     :ticket="ticket"
                     :comments="ticket.comments || []"
                     :read-only="true"
+                    class="mt-6"
                 />
             </div>
 
@@ -374,118 +419,159 @@ const formatDate = (dateString) => {
                     :ticket="ticket"
                 />
 
-                <!-- Card 1: Ticket Details + Pelapor + Attachment -->
+                <!-- Card 1: Ticket Detail -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50 flex items-start justify-between">
-                        <div class="flex items-center">
-                            <div class="p-2 bg-blue-100 rounded-lg mr-3">
-                                <Ticket class="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <span class="text-sm font-mono text-blue-600">
-                                    {{ ticket.ticket_number }}
-                                </span>
-                                <h1 class="text-xl font-semibold text-gray-900 mt-1">
-                                    {{ ticket.title }}
-                                </h1>
-                            </div>
-                        </div>
-                        <StatusBadge
-                            :status="ticket.status"
-                            :label="statuses[ticket.status] || ticket.status"
-                        />
+                    <!-- Header: Judul Tiket -->
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h1 class="text-xl font-semibold text-gray-900">
+                            {{ ticket.title }}
+                        </h1>
                     </div>
 
                     <div class="p-6 space-y-8">
-                        <!-- 1. Meta Info Grid -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Kategori</p>
-                                <p class="text-sm font-medium text-gray-900 flex items-center gap-1">
-                                    <Tag class="w-4 h-4 text-gray-400" />
-                                    {{ ticket.category?.name || '-' }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Prioritas</p>
-                                <PriorityBadge
-                                    v-if="ticket.final_priority || ticket.user_priority"
-                                    :priority="ticket.final_priority || ticket.user_priority"
-                                />
-                                <span v-else class="text-sm text-gray-400">-</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Dibuat</p>
-                                <p class="text-sm text-gray-900 flex items-center gap-1">
-                                    <Calendar class="w-4 h-4 text-gray-400" />
-                                    {{ formatDate(ticket.created_at) }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Ditugaskan Ke</p>
-                                <p class="text-sm text-gray-900 flex items-center gap-1">
-                                    <User class="w-4 h-4 text-gray-400" />
-                                    {{ ticket.assigned_to?.name || 'Belum ditugaskan' }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- 2. Deskripsi & Solusi -->
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 mb-2">Deskripsi Tiket</h3>
-                                <div class="p-4 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap leading-relaxed border border-gray-100">
-                                    {{ ticket.description }}
-                                </div>
-                            </div>
-
-                            <div v-if="ticket.pending_reason" class="p-4 bg-orange-50 rounded-lg border border-orange-100">
-                                <h3 class="text-sm font-medium text-orange-800 mb-2 flex items-center gap-2">
-                                    <Clock class="w-4 h-4" />
-                                    Sedang Pending
-                                </h3>
-                                <p class="text-sm text-orange-700">{{ ticket.pending_reason }}</p>
-                            </div>
-
-                            <div v-if="ticket.resolution" class="p-4 bg-green-50 rounded-lg border border-green-100">
-                                <h3 class="text-sm font-medium text-green-800 mb-2 flex items-center gap-2">
-                                    ✓ Solusi/Penyelesaian
-                                </h3>
-                                <div class="text-sm text-green-700 whitespace-pre-wrap">
-                                    {{ ticket.resolution }}
-                                </div>
-                                <p v-if="ticket.resolved_at" class="text-xs text-green-600 mt-2">
-                                    Diselesaikan: {{ formatDate(ticket.resolved_at) }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- 3. Pelapor Info (Merged into Detail Card) -->
-                        <div class="pt-6 border-t border-gray-100">
-                            <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 tracking-widest">Informasi Pelapor</h3>
-                            <div class="flex items-center gap-4 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                                    <span class="text-blue-600 font-bold text-lg">
-                                        {{ ticket.reporter?.name?.charAt(0) || '?' }}
+                        <!-- 1. Nomor Tiket (Kiri) + Info Detail (Kanan) -->
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <!-- Nomor Tiket Card -->
+                            <div class="flex-shrink-0">
+                                <div class="w-48 h-36 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex flex-col items-center justify-center text-white shadow-lg">
+                                    <Ticket class="w-8 h-8 mb-2 opacity-80" />
+                                    <span class="text-2xl font-bold font-mono tracking-wider">
+                                        {{ ticket.ticket_number }}
                                     </span>
+                                    <span class="text-xs mt-1 text-blue-100">Nomor Tiket</span>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-gray-900">{{ ticket.reporter?.name }}</p>
-                                    <p class="text-sm text-gray-500 flex items-center gap-1">
-                                        <Tag class="w-3 h-3" />
-                                        {{ ticket.reporter?.unit?.name || '-' }}
-                                    </p>
+                            </div>
+
+                            <!-- Detail Info Grid -->
+                            <div class="flex-1">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                                    <!-- Pelapor -->
+                                    <div class="flex items-start gap-3">
+                                        <User class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Pelapor</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.reporter?.name || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dibuat -->
+                                    <div class="flex items-start gap-3">
+                                        <Calendar class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Dibuat</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ formatDate(ticket.created_at) }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nomor Telepon -->
+                                    <div class="flex items-start gap-3">
+                                        <Phone class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Nomor Telepon</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.reporter?.phone || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="flex items-start gap-3">
+                                        <Mail class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Email</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.reporter?.email || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Kategori -->
+                                    <div class="flex items-start gap-3">
+                                        <Tag class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Kategori</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.category?.name || '-' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dampak / Urgensi -->
+                                    <div class="flex items-start gap-3">
+                                        <Shield class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Dampak / Urgensi</p>
+                                            <PriorityBadge
+                                                v-if="ticket.final_priority || ticket.user_priority"
+                                                :priority="ticket.final_priority || ticket.user_priority"
+                                            />
+                                            <span v-else class="text-sm text-gray-400">-</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="flex items-start gap-3">
+                                        <Clock class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Status</p>
+                                            <StatusBadge
+                                                :status="ticket.status"
+                                                :label="statuses[ticket.status] || ticket.status"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Petugas -->
+                                    <div class="flex items-start gap-3">
+                                        <User class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-xs text-gray-500">Petugas</p>
+                                            <p class="text-sm font-semibold text-gray-900">{{ ticket.assigned_to?.name || 'Belum ditugaskan' }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 4. Lampiran (Merged into Detail Card) -->
-                        <div class="pt-6 border-t border-gray-100">
-                            <h3 class="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 flex items-center justify-between tracking-widest">
-                                Lampiran File
-                                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                                    {{ ticket.attachments?.length || 0 }} FILES
-                                </span>
+                        <!-- Divider -->
+                        <hr class="border-gray-100" />
+
+                        <!-- 2. Alasan / Deskripsi -->
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4 flex items-center gap-2">
+                                <FileText class="w-4 h-4 text-gray-500" />
+                                Deskripsi Tiket
+                            </h3>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                {{ ticket.description }}
+                            </p>
+                        </div>
+
+                        <!-- Pending Reason -->
+                        <div v-if="ticket.pending_reason">
+                            <hr class="border-gray-100 mb-6" />
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-orange-700 mb-4 flex items-center gap-2">
+                                <!-- <Clock class="w-4 h-4" /> -->
+                                Alasan Dikembalikan
+                            </h3>
+                            <p class="text-sm text-orange-600">{{ ticket.pending_reason }}</p>
+                        </div>
+
+                        <!-- 3. Penyelesaian -->
+                        <div v-if="ticket.resolution">
+                            <hr class="border-gray-100 mb-6" />
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4 flex items-center gap-2">
+                                <CheckCircle class="w-4 h-4 text-gray-500" />
+                                Penyelesaian
+                            </h3>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                {{ ticket.resolution }}
+                            </p>
+                            <p v-if="ticket.resolved_at" class="text-xs text-gray-400 mt-3">
+                                Diselesaikan: {{ formatDate(ticket.resolved_at) }}
+                            </p>
+                        </div>
+
+                        <!-- 4. Bukti Dukung Penyelesaian Tiket -->
+                        <div>
+                            <hr class="border-gray-100 mb-6" />
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4 flex items-center gap-2">
+                                <Paperclip class="w-4 h-4 text-gray-500" />
+                                Bukti Dukung Penyelesaian Tiket
                             </h3>
                             <AttachmentList :attachments="ticket.attachments || []" />
                         </div>
@@ -505,7 +591,6 @@ const formatDate = (dateString) => {
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                         <h3 class="font-bold text-gray-900 flex items-center gap-2">
-                            <Clock class="w-4 h-4 text-blue-600" />
                             Riwayat Tiket
                         </h3>
                     </div>

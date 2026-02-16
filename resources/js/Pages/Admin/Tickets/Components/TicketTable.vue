@@ -261,10 +261,10 @@ const formatDate = (dateString) => {
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
-                        <div class="p-2 bg-green-100 rounded-lg">
+                        <!-- <div class="p-2 bg-green-100 rounded-lg">
                             <CheckCircle class="w-6 h-6 text-green-600" />
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900">Konfirmasi Penyelesaian</h3>
+                        </div> -->
+                        <h3 class="text-xl font-bold text-gray-900">Konfirmasi Penyelesaian Teknisi</h3>
                     </div>
                     <button @click="showConfirmModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
                         <X class="w-6 h-6" />

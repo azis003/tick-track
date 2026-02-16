@@ -105,9 +105,8 @@ const canViewInternal = () => {
 }
 
 // Check if user can add comment based on ticket status and role
-// IMPORTANT: Staff (Helpdesk/Teknisi) cannot add comments directly.
-// They can only add notes through workflow actions (e.g., "Return to User" action).
-// Only Creator (who created the ticket) can comment, and only when ticket is returned to them (pending_user).
+// Creator (who created the ticket) can comment when ticket is returned to them (pending_user).
+// Staff (Helpdesk/Teknisi) cannot add comments directly in other cases.
 const canComment = computed(() => {
     // If read-only mode, no commenting allowed
     if (props.readOnly) {
@@ -119,16 +118,17 @@ const canComment = computed(() => {
         return false
     }
     
-    // Staff (technician/helpdesk) CANNOT comment directly
-    // They use workflow action panels with notes fields instead
-    const isStaff = canViewInternal()
-    if (isStaff) return false
-
-    // Creator can only comment when ticket is returned to them (pending_user)
+    // Creator can comment when ticket is returned to them (pending_user)
+    // This takes priority over the staff check, because helpdesk can also be a creator
     const isCreator = props.ticket.created_by_id == auth?.user?.id
     if (isCreator && props.ticket.status === 'pending_user') {
         return true
     }
+
+    // Staff (technician/helpdesk) CANNOT comment directly in other cases
+    // They use workflow action panels with notes fields instead
+    const isStaff = canViewInternal()
+    if (isStaff) return false
 
     return false
 })
@@ -222,7 +222,7 @@ const handleFileUpload = (event) => {
             </form>
 
             <!-- Comment Disabled Message -->
-            <div v-else class="p-4 bg-gray-50 border border-gray-100 rounded-lg flex items-center gap-3">
+            <!-- <div v-else class="p-4 bg-gray-50 border border-gray-100 rounded-lg flex items-center gap-3">
                 <div class="p-2 bg-gray-200 rounded-lg">
                     <Lock class="w-4 h-4 text-gray-500" />
                 </div>
@@ -243,7 +243,7 @@ const handleFileUpload = (event) => {
                         {{ (ticket.status === 'closed' || ticket.status === 'resolved') ? 'History percakapan tetap tersimpan untuk audit.' : 'Riwayat percakapan tetap dapat dilihat di bawah.' }}
                     </p>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Comments List -->
             <div v-if="comments.length > 0" class="space-y-4 pt-4 border-t">

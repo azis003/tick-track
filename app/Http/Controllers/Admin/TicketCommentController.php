@@ -42,20 +42,22 @@ class TicketCommentController extends Controller implements HasMiddleware
 
         $user = $request->user();
 
-        // 2. Staff (Helpdesk/Teknisi) CANNOT comment directly
-        // They should use workflow actions (Return to User, etc.) which have their own notes
-        $isStaff = $user->can('tickets.view-all') || $user->can('tickets.work');
-
-        if ($isStaff) {
-            return back()->with('error', 'Gunakan tombol aksi (seperti "Kembalikan ke User") untuk berkomunikasi dengan pelapor.');
-        }
-
-        // 3. Creator (who created the ticket) can only comment when ticket is returned to them
+        // 2. Creator (who created the ticket) can comment when ticket is returned to them
+        // This check comes FIRST because helpdesk can be both staff AND creator
         if ($ticket->created_by_id === $user->id) {
             if ($ticket->status !== Ticket::STATUS_PENDING_USER) {
                 return back()->with('error', 'Komentar hanya diperbolehkan jika tiket dikembalikan ke Anda (Pending User) untuk informasi tambahan.');
             }
+            // Creator + pending_user = allowed, continue to store comment
         } else {
+            // 3. Staff (Helpdesk/Teknisi) CANNOT comment directly on other people's tickets
+            // They should use workflow actions (Return to User, etc.) which have their own notes
+            $isStaff = $user->can('tickets.view-all') || $user->can('tickets.work');
+
+            if ($isStaff) {
+                return back()->with('error', 'Gunakan tombol aksi (seperti "Kembalikan ke User") untuk berkomunikasi dengan pelapor.');
+            }
+
             // Not staff and not creator - no access
             return back()->with('error', 'Anda tidak memiliki akses untuk berkomentar pada tiket ini.');
         }

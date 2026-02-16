@@ -38,11 +38,11 @@ const submitReopen = () => {
     <div class="bg-white border-2 border-green-200 rounded-xl overflow-hidden shadow-md">
         <!-- Header -->
         <div class="px-6 py-4 bg-green-50 border-b border-green-100 flex items-center gap-3">
-            <div class="p-2 bg-green-100 rounded-lg">
+            <!-- <div class="p-2 bg-green-100 rounded-lg">
                 <CheckCircle2 class="w-5 h-5 text-green-600" />
-            </div>
+            </div> -->
             <div>
-                <h3 class="font-bold text-green-900">Konfirmasi Penyelesaian</h3>
+                <h3 class="font-bold text-green-900">Konfirmasi Penyelesaian 2</h3>
                 <p class="text-xs text-green-700">Teknisi telah menandai tiket ini sebagai selesai.</p>
             </div>
         </div>
