@@ -32,7 +32,7 @@ export const menuItems = [
     {
         name: "Dashboard",
         icon: LayoutDashboard,
-        href: "/admin/dashboard",
+        href: "/dashboard",
         permissions: [],
         description: "Statistik tiket dan performa harian",
     },
@@ -43,21 +43,21 @@ export const menuItems = [
         dropdown: [
             {
                 name: "Tiket Saya",
-                href: "/admin/tickets/my-tickets",
+                href: "/tickets/my-tickets",
                 icon: List,
                 description: "Tiket yang Anda buat",
                 permissions: ['tickets.view-own', 'tickets.create']
             },
             {
                 name: "Daftar Tugas",
-                href: "/admin/tickets/task-queue",
+                href: "/tickets/task-queue",
                 icon: CheckSquare,
                 description: "Tiket yang memerlukan tindakan Anda",
                 permissions: ['tickets.view-own', 'tickets.work', 'tickets.triage', 'tickets.approve']
             },
             {
                 name: "Semua Tiket",
-                href: "/admin/tickets",
+                href: "/tickets",
                 icon: Database,
                 description: "Lihat semua tiket dalam sistem",
                 permissions: ['tickets.view-all']
@@ -71,28 +71,28 @@ export const menuItems = [
         dropdown: [
             {
                 name: "User",
-                href: "/admin/users",
+                href: "/users",
                 icon: Users,
                 description: "Manajemen data pengguna sistem",
                 permissions: ['users.index']
             },
             {
                 name: "Unit Kerja",
-                href: "/admin/units",
+                href: "/units",
                 icon: Building2,
                 description: "Kelola struktur organisasi",
                 permissions: ['units.index']
             },
             {
                 name: "Kategori",
-                href: "/admin/categories",
+                href: "/categories",
                 icon: Tags,
                 description: "Klasifikasi kategori kendala TI",
                 permissions: ['categories.index']
             },
             {
                 name: "Prioritas",
-                href: "/admin/priorities",
+                href: "/priorities",
                 icon: Shield,
                 description: "Atur skala urgensi & SLA tiket",
                 permissions: ['priorities.index']
@@ -106,14 +106,14 @@ export const menuItems = [
         dropdown: [
             {
                 name: "Laporan Tiket",
-                href: "/admin/reports",
+                href: "/reports",
                 icon: FileText,
                 description: "Analisis data dan ekspor laporan",
                 permissions: ['reports.view']
             },
             {
                 name: "Approval",
-                href: "/admin/approvals",
+                href: "/approvals",
                 icon: CheckSquare,
                 description: "Persetujuan permintaan khusus IT",
                 permissions: ['approvals.approve', 'approvals.request']
@@ -127,28 +127,28 @@ export const menuItems = [
         dropdown: [
             {
                 name: "Roles",
-                href: "/admin/roles",
+                href: "/roles",
                 icon: Shield,
                 description: "Hak akses kelompok pengguna",
                 permissions: ['roles.index']
             },
             {
                 name: "Permissions",
-                href: "/admin/permissions",
+                href: "/permissions",
                 icon: Key,
                 description: "Daftar izin fitur aplikasi",
                 permissions: ['permissions.index']
             },
             {
                 name: "Konfigurasi Sistem",
-                href: "/admin/settings",
+                href: "/settings",
                 icon: Settings,
                 description: "Konfigurasi global aplikasi",
                 permissions: ['system.config']
             },
             {
                 name: "Log Aktivitas",
-                href: "/admin/logs",
+                href: "/logs",
                 icon: Activity,
                 description: "Audit trail aktivitas sistem",
                 permissions: ['system.logs']

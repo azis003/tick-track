@@ -96,7 +96,7 @@ class CategoryController extends Controller implements HasMiddleware
         ]);
 
         return redirect()
-            ->route('admin.categories.index')
+            ->route('categories.index')
             ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
@@ -148,7 +148,7 @@ class CategoryController extends Controller implements HasMiddleware
         ]);
 
         return redirect()
-            ->route('admin.categories.index')
+            ->route('categories.index')
             ->with('success', 'Kategori berhasil diperbarui.');
     }
 
@@ -163,14 +163,14 @@ class CategoryController extends Controller implements HasMiddleware
         // Cek apakah ada tiket dengan kategori ini
         if ($category->tickets()->count() > 0) {
             return redirect()
-                ->route('admin.categories.index')
+                ->route('categories.index')
                 ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh ' . $category->tickets()->count() . ' tiket.');
         }
 
         $category->delete();
 
         return redirect()
-            ->route('admin.categories.index')
+            ->route('categories.index')
             ->with('success', 'Kategori berhasil dihapus.');
     }
 }

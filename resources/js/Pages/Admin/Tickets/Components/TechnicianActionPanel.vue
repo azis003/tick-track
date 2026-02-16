@@ -35,7 +35,7 @@ const startWork = () => {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            useForm({}).post(`/admin/tickets/${props.ticket.id}/accept`, {
+            useForm({}).post(`/tickets/${props.ticket.id}/accept`, {
                 preserveScroll: true,
                 onSuccess: () => emit('close')
             })
@@ -44,7 +44,7 @@ const startWork = () => {
 }
 
 const submitReturn = () => {
-    returnForm.post(`/admin/tickets/${props.ticket.id}/return`, {
+    returnForm.post(`/tickets/${props.ticket.id}/return`, {
         preserveScroll: true,
         onSuccess: () => {
             returnForm.reset()

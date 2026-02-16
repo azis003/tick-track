@@ -191,7 +191,7 @@ class TicketController extends Controller implements HasMiddleware
             $request->file('attachments', [])
         );
 
-        return redirect()->route('admin.tickets.my-tickets')
+        return redirect()->route('tickets.my-tickets')
             ->with('success', 'Tiket berhasil dibuat dengan nomor ' . $ticket->ticket_number);
     }
 
@@ -299,12 +299,12 @@ class TicketController extends Controller implements HasMiddleware
                 $user,
                 $request->notes
             );
-            return redirect()->route('admin.tickets.task-queue')
+            return redirect()->route('tickets.task-queue')
                 ->with('success', 'Tiket berhasil diverifikasi dan ditugaskan ke teknisi.');
         } else {
             // self_handle
             $this->ticketService->startSelfHandle($ticket, $user);
-            return redirect()->route('admin.tickets.task-queue')
+            return redirect()->route('tickets.task-queue')
                 ->with('success', 'Tiket berhasil diverifikasi. Anda mulai mengerjakan tiket ini.');
         }
     }
@@ -385,7 +385,7 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->returnToHelpdesk($ticket, $request->reason, $user);
 
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', 'Tiket berhasil dikembalikan ke Helpdesk.');
     }
 
@@ -441,7 +441,7 @@ class TicketController extends Controller implements HasMiddleware
         );
 
         $typeLabel = $request->type === 'user' ? 'User' : 'Vendor/Pihak Eksternal';
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', "Tiket di-pending menunggu {$typeLabel}.");
     }
 
@@ -523,7 +523,7 @@ class TicketController extends Controller implements HasMiddleware
             $user
         );
 
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', 'Permintaan telah disetujui. Tiket dilanjutkan ke pengerjaan.');
     }
 
@@ -555,7 +555,7 @@ class TicketController extends Controller implements HasMiddleware
             $user
         );
 
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', 'Permintaan telah ditolak. Tiket dikembalikan ke pengerjaan.');
     }
 
@@ -589,7 +589,7 @@ class TicketController extends Controller implements HasMiddleware
             $request->file('evidence', [])
         );
 
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', 'Tiket berhasil diselesaikan. Menunggu konfirmasi dari pelapor.');
     }
 
@@ -612,7 +612,7 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->closeTicket($ticket, $user);
 
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', 'Tiket telah berhasil ditutup. Terima kasih atas konfirmasinya.');
     }
 
@@ -639,7 +639,7 @@ class TicketController extends Controller implements HasMiddleware
 
         $this->ticketService->reopenTicket($ticket, $request->reason, $user);
 
-        return redirect()->route('admin.tickets.task-queue')
+        return redirect()->route('tickets.task-queue')
             ->with('success', 'Tiket telah dibuka kembali untuk diproses ulang oleh teknisi.');
     }
 

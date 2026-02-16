@@ -45,7 +45,7 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/roles',
+            '/roles',
             { search: newValue },
             { preserveState: true, replace: true }
         )
@@ -80,7 +80,7 @@ const isProtected = (roleName) => {
             title="Data Role"
             description="Kelola daftar role dan permissions pengguna"
             :showButton="true"
-            action="/admin/roles/create"
+            action="/roles/create"
             actionText="Tambah Role"
             permission="roles.create"
         />
@@ -183,7 +183,7 @@ const isProtected = (roleName) => {
                                     <!-- Edit Button -->
                                     <Link
                                         v-if="hasAnyPermission(['roles.edit'])"
-                                        :href="`/admin/roles/${role.id}/edit`"
+                                        :href="`/roles/${role.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
@@ -193,7 +193,7 @@ const isProtected = (roleName) => {
                                     <!-- Delete Button (disabled for protected roles) -->
                                     <Delete
                                         v-if="hasAnyPermission(['roles.delete']) && !isProtected(role.name)"
-                                        URL="/admin/roles"
+                                        URL="/roles"
                                         :id="role.id"
                                     />
                                     <span

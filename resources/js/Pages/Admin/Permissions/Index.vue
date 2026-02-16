@@ -41,7 +41,7 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/permissions',
+            '/permissions',
             { search: newValue },
             { preserveState: true, replace: true }
         )
@@ -58,7 +58,7 @@ watch(search, (newValue) => {
             title="Data Permission"
             description="Kelola daftar permission sistem"
             :showButton="true"
-            action="/admin/permissions/create"
+            action="/permissions/create"
             actionText="Tambah Permission"
             permission="permissions.create"
         />
@@ -152,7 +152,7 @@ watch(search, (newValue) => {
                                     <!-- Edit Button -->
                                     <Link
                                         v-if="hasAnyPermission(['permissions.edit'])"
-                                        :href="`/admin/permissions/${permission.id}/edit`"
+                                        :href="`/permissions/${permission.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
@@ -162,7 +162,7 @@ watch(search, (newValue) => {
                                     <!-- Delete Button -->
                                     <Delete
                                         v-if="hasAnyPermission(['permissions.delete'])"
-                                        URL="/admin/permissions"
+                                        URL="/permissions"
                                         :id="permission.id"
                                     />
                                 </div>

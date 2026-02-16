@@ -19,7 +19,7 @@ const form = useForm({
 
 // Submit handler
 const submit = () => {
-    form.post('/admin/priorities', {
+    form.post('/priorities', {
         preserveScroll: true,
     })
 }
@@ -58,7 +58,7 @@ const getEmojiByLevel = (level) => {
         <!-- Back Link -->
         <div class="mb-6">
             <Link
-                href="/admin/priorities"
+                href="/priorities"
                 class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
                 <ArrowLeft class="w-4 h-4 mr-2" />
@@ -245,7 +245,7 @@ const getEmojiByLevel = (level) => {
                     <!-- Form Actions -->
                     <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
                         <Link
-                            href="/admin/priorities"
+                            href="/priorities"
                             class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                         >
                             Batal

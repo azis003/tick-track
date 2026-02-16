@@ -77,7 +77,7 @@ class TicketCommentController extends Controller implements HasMiddleware
             $this->ticketService->resumeFromPending($ticket, 'User memberikan respon/informasi tambahan.', $user);
 
             // Redirect to task-queue with success message
-            return redirect()->route('admin.tickets.task-queue')
+            return redirect()->route('tickets.task-queue')
                 ->with('success', 'Tanggapan Anda berhasil dikirim. Tiket akan dilanjutkan oleh petugas.');
         }
 

@@ -41,7 +41,7 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/users',
+            '/users',
             { search: newValue },
             { preserveState: true, replace: true }
         )
@@ -71,7 +71,7 @@ const getStatusBadgeClass = (isActive) => {
             title="Data User"
             description="Kelola data pengguna dan role akses sistem"
             :showButton="true"
-            action="/admin/users/create"
+            action="/users/create"
             actionText="Tambah User"
             permission="users.create"
         />
@@ -180,7 +180,7 @@ const getStatusBadgeClass = (isActive) => {
                                     <!-- Edit Button -->
                                     <Link
                                         v-if="hasAnyPermission(['users.edit'])"
-                                        :href="`/admin/users/${user.id}/edit`"
+                                        :href="`/users/${user.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
@@ -190,7 +190,7 @@ const getStatusBadgeClass = (isActive) => {
                                     <!-- Delete Button -->
                                     <Delete
                                         v-if="hasAnyPermission(['users.delete'])"
-                                        URL="/admin/users"
+                                        URL="/users"
                                         :id="user.id"
                                     />
                                 </div>

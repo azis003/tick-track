@@ -93,7 +93,7 @@ const getPriorityEmoji = (priority) => {
                             {{ ticket.created_at }}
                         </div>
                         <Link
-                            :href="`/admin/tickets/${ticket.id}`"
+                            :href="`/tickets/${ticket.id}`"
                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-yellow-700 transition-all duration-200 bg-yellow-100 border border-yellow-200 rounded-lg hover:bg-yellow-200 hover:border-yellow-300"
                         >
                             Triage
@@ -115,7 +115,7 @@ const getPriorityEmoji = (priority) => {
             <!-- View All Button -->
             <div v-if="triageQueue.length > 0" class="pt-4 mt-4 border-t border-gray-100">
                 <Link
-                    href="/admin/tickets/triage"
+                    href="/tickets/triage"
                     class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-yellow-600 transition-colors bg-yellow-50 hover:bg-yellow-100 rounded-lg"
                 >
                     Lihat Semua Tiket Perlu Triage

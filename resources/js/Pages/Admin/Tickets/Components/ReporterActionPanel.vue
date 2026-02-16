@@ -11,7 +11,7 @@ const props = defineProps({
 
 const resumeTicket = () => {
     if (confirm('Sudah memberikan informasi yang dibutuhkan? Tiket akan dikembalikan ke teknisi.')) {
-        router.post(`/admin/tickets/${props.ticket.id}/resume`, {
+        router.post(`/tickets/${props.ticket.id}/resume`, {
             notes: 'User mengonfirmasi informasi telah diberikan melalui tombol aksi.'
         }, {
             preserveScroll: true

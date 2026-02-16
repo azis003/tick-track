@@ -74,7 +74,7 @@ const acceptTicket = (ticketId, event) => {
     event.preventDefault()
     event.stopPropagation()
     if (confirm('Mulai kerjakan tiket ini?')) {
-        router.post(`/admin/tickets/${ticketId}/accept`, {}, {
+        router.post(`/tickets/${ticketId}/accept`, {}, {
             preserveScroll: true
         })
     }
@@ -93,7 +93,7 @@ const openReturnModal = (ticket, event) => {
 const submitReturn = () => {
     if (!selectedTicket.value) return
     
-    returnForm.post(`/admin/tickets/${selectedTicket.value.id}/return`, {
+    returnForm.post(`/tickets/${selectedTicket.value.id}/return`, {
         preserveScroll: true,
         onSuccess: () => {
             showReturnModal.value = false
@@ -186,7 +186,7 @@ const submitReturn = () => {
                     </div>
                 </div>
                 <Link 
-                    href="/admin/tickets/assigned" 
+                    href="/tickets/assigned" 
                     class="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                 >
                     Lihat Semua →
@@ -200,7 +200,7 @@ const submitReturn = () => {
                         class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all group"
                     >
                         <Link 
-                            :href="`/admin/tickets/${ticket.id}`"
+                            :href="`/tickets/${ticket.id}`"
                             class="flex-1"
                         >
                             <div class="flex items-center gap-2 mb-1">
@@ -248,7 +248,7 @@ const submitReturn = () => {
                             <!-- Status: in_progress/pending - Show Kerjakan -->
                             <template v-else>
                                 <Link
-                                    :href="`/admin/tickets/${ticket.id}`"
+                                    :href="`/tickets/${ticket.id}`"
                                     class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                                 >
                                     <Wrench class="w-4 h-4" />

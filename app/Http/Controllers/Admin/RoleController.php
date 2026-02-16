@@ -107,7 +107,7 @@ class RoleController extends Controller
         }
 
         return redirect()
-            ->route('admin.roles.index')
+            ->route('roles.index')
             ->with('success', 'Role berhasil ditambahkan dengan ' . count($request->permissions ?? []) . ' permission.');
     }
 
@@ -183,7 +183,7 @@ class RoleController extends Controller
         $role->syncPermissions($request->permissions ?? []);
 
         return redirect()
-            ->route('admin.roles.index')
+            ->route('roles.index')
             ->with('success', 'Role berhasil diperbarui dengan ' . count($request->permissions ?? []) . ' permission.');
     }
 
@@ -198,14 +198,14 @@ class RoleController extends Controller
         // Prevent deletion of protected roles
         if (in_array($role->name, $this->getProtectedRoles())) {
             return redirect()
-                ->route('admin.roles.index')
+                ->route('roles.index')
                 ->with('error', 'Role "' . $role->name . '" adalah role sistem dan tidak dapat dihapus.');
         }
 
         // Check if role is being used by any user
         if ($role->users()->count() > 0) {
             return redirect()
-                ->route('admin.roles.index')
+                ->route('roles.index')
                 ->with('error', 'Role masih digunakan oleh ' . $role->users()->count() . ' user. Ubah role user terlebih dahulu.');
         }
 
@@ -213,7 +213,7 @@ class RoleController extends Controller
         $role->delete();
 
         return redirect()
-            ->route('admin.roles.index')
+            ->route('roles.index')
             ->with('success', 'Role berhasil dihapus.');
     }
 }

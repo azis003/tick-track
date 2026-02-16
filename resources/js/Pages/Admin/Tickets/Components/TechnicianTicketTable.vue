@@ -50,7 +50,7 @@ const formatDate = (dateString) => {
 // Accept and start working on ticket
 const acceptTicket = (ticketId) => {
     if (confirm('Mulai kerjakan tiket ini?')) {
-        router.post(`/admin/tickets/${ticketId}/accept`, {}, {
+        router.post(`/tickets/${ticketId}/accept`, {}, {
             preserveScroll: true
         })
     }
@@ -67,7 +67,7 @@ const openReturnModal = (ticket) => {
 const submitReturn = () => {
     if (!selectedTicket.value) return
     
-    returnForm.post(`/admin/tickets/${selectedTicket.value.id}/return`, {
+    returnForm.post(`/tickets/${selectedTicket.value.id}/return`, {
         preserveScroll: true,
         onSuccess: () => {
             showReturnModal.value = false
@@ -120,7 +120,7 @@ const isWorkingStatus = (status) => ['in_progress', 'pending_user', 'pending_ext
                     >
                         <td class="px-6 py-4 whitespace-nowrap">
                             <Link
-                                :href="`/admin/tickets/${ticket.id}`"
+                                :href="`/tickets/${ticket.id}`"
                                 class="text-blue-600 hover:text-blue-800 font-mono text-sm font-medium"
                             >
                                 {{ ticket.ticket_number }}
@@ -174,7 +174,7 @@ const isWorkingStatus = (status) => ['in_progress', 'pending_user', 'pending_ext
                             <!-- Actions for IN_PROGRESS/PENDING status: Kerjakan -->
                             <div v-else-if="isWorkingStatus(ticket.status)" class="flex items-center justify-end gap-2">
                                 <Link
-                                    :href="`/admin/tickets/${ticket.id}`"
+                                    :href="`/tickets/${ticket.id}`"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                                 >
                                     <Wrench class="h-4 w-4" />
@@ -185,7 +185,7 @@ const isWorkingStatus = (status) => ['in_progress', 'pending_user', 'pending_ext
                             <!-- Default: Lihat -->
                             <div v-else>
                                 <Link
-                                    :href="`/admin/tickets/${ticket.id}`"
+                                    :href="`/tickets/${ticket.id}`"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
                                 >
                                     <Eye class="h-4 w-4" />

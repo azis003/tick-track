@@ -88,7 +88,7 @@ const submitApprove = () => {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            approveForm.post(`/admin/tickets/${props.ticket.id}/approve`, {
+            approveForm.post(`/tickets/${props.ticket.id}/approve`, {
                 preserveScroll: true,
                 onSuccess: () => {
                     approveForm.reset()
@@ -110,7 +110,7 @@ const submitReject = () => {
         return
     }
 
-    rejectForm.post(`/admin/tickets/${props.ticket.id}/reject`, {
+    rejectForm.post(`/tickets/${props.ticket.id}/reject`, {
         preserveScroll: true,
         onSuccess: () => {
             rejectForm.reset()

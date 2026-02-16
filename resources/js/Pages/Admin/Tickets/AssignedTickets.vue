@@ -30,7 +30,7 @@ const search = ref(props.filters.search || '')
 const status = ref(props.filters.status || '')
 
 const applyFilters = debounce(() => {
-    router.get('/admin/tickets/assigned', {
+    router.get('/tickets/assigned', {
         search: search.value || undefined,
         status: status.value || undefined
     }, {

@@ -25,7 +25,7 @@ defineProps({
 const userNavigation = [
     {
         name: 'Pengaturan',
-        href: '/admin/settings',
+        href: '/settings',
         icon: Settings,
     },
     {

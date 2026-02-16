@@ -48,7 +48,7 @@ const props = defineProps({
             </div>
             <Link
                 v-if="hasPermission('tickets.create')"
-                href="/admin/tickets/create"
+                href="/tickets/create"
                 class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm"
             >
                 <Plus class="w-4 h-4 mr-2" />
@@ -60,7 +60,7 @@ const props = defineProps({
         <TicketFilters
             :filters="filters"
             :statuses="statuses"
-            route-name="admin.tickets.my-tickets"
+            route-name="tickets.my-tickets"
         />
 
         <!-- Table -->

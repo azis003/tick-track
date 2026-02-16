@@ -17,14 +17,14 @@ const reopenForm = useForm({
 
 const confirmSolution = () => {
     if (confirm('Apakah Anda yakin solusi ini sudah meresolve kendala Anda? Tiket akan ditutup.')) {
-        router.post(`/admin/tickets/${props.ticket.id}/close`, {}, {
+        router.post(`/tickets/${props.ticket.id}/close`, {}, {
             preserveScroll: true
         })
     }
 }
 
 const submitReopen = () => {
-    reopenForm.post(`/admin/tickets/${props.ticket.id}/reopen`, {
+    reopenForm.post(`/tickets/${props.ticket.id}/reopen`, {
         preserveScroll: true,
         onSuccess: () => {
             showReopenForm.value = false

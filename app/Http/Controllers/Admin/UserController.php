@@ -115,7 +115,7 @@ class UserController extends Controller implements HasMiddleware
         $user->syncRoles($request->roles);
 
         return redirect()
-            ->route('admin.users.index')
+            ->route('users.index')
             ->with('success', 'User berhasil ditambahkan.');
     }
 
@@ -187,7 +187,7 @@ class UserController extends Controller implements HasMiddleware
         $user->syncRoles($request->roles);
 
         return redirect()
-            ->route('admin.users.index')
+            ->route('users.index')
             ->with('success', 'User berhasil diperbarui.');
     }
 
@@ -202,14 +202,14 @@ class UserController extends Controller implements HasMiddleware
         // Prevent deleting own account
         if ($user->id === auth()->id()) {
             return redirect()
-                ->route('admin.users.index')
+                ->route('users.index')
                 ->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 
         $user->delete();
 
         return redirect()
-            ->route('admin.users.index')
+            ->route('users.index')
             ->with('success', 'User berhasil dihapus.');
     }
 }

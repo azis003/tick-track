@@ -208,7 +208,7 @@ const formatDate = (dateString) => {
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <Link
-                                    :href="`/admin/tickets/${ticket.id}`"
+                                    :href="`/tickets/${ticket.id}`"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                                 >
                                     <Eye class="h-4 w-4" />

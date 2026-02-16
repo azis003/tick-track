@@ -32,12 +32,12 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth');
 
 // ==============================================
-// ROUTES UNTUK ADMIN (Authenticated Users)
+// ROUTES UNTUK AUTHENTICATED USERS
 // ==============================================
 
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ==============================================
     // MASTER DATA - Permissions CRUD
@@ -45,12 +45,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('permissions', PermissionController::class)
         ->except(['show'])
         ->names([
-            'index' => 'admin.permissions.index',
-            'create' => 'admin.permissions.create',
-            'store' => 'admin.permissions.store',
-            'edit' => 'admin.permissions.edit',
-            'update' => 'admin.permissions.update',
-            'destroy' => 'admin.permissions.destroy',
+            'index' => 'permissions.index',
+            'create' => 'permissions.create',
+            'store' => 'permissions.store',
+            'edit' => 'permissions.edit',
+            'update' => 'permissions.update',
+            'destroy' => 'permissions.destroy',
         ]);
 
     // ==============================================
@@ -59,12 +59,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('roles', RoleController::class)
         ->except(['show'])
         ->names([
-            'index' => 'admin.roles.index',
-            'create' => 'admin.roles.create',
-            'store' => 'admin.roles.store',
-            'edit' => 'admin.roles.edit',
-            'update' => 'admin.roles.update',
-            'destroy' => 'admin.roles.destroy',
+            'index' => 'roles.index',
+            'create' => 'roles.create',
+            'store' => 'roles.store',
+            'edit' => 'roles.edit',
+            'update' => 'roles.update',
+            'destroy' => 'roles.destroy',
         ]);
 
     // ==============================================
@@ -73,12 +73,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('users', App\Http\Controllers\Admin\UserController::class)
         ->except(['show'])
         ->names([
-            'index' => 'admin.users.index',
-            'create' => 'admin.users.create',
-            'store' => 'admin.users.store',
-            'edit' => 'admin.users.edit',
-            'update' => 'admin.users.update',
-            'destroy' => 'admin.users.destroy',
+            'index' => 'users.index',
+            'create' => 'users.create',
+            'store' => 'users.store',
+            'edit' => 'users.edit',
+            'update' => 'users.update',
+            'destroy' => 'users.destroy',
         ]);
 
     // ==============================================
@@ -87,12 +87,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('units', App\Http\Controllers\Admin\UnitController::class)
         ->except(['show'])
         ->names([
-            'index' => 'admin.units.index',
-            'create' => 'admin.units.create',
-            'store' => 'admin.units.store',
-            'edit' => 'admin.units.edit',
-            'update' => 'admin.units.update',
-            'destroy' => 'admin.units.destroy',
+            'index' => 'units.index',
+            'create' => 'units.create',
+            'store' => 'units.store',
+            'edit' => 'units.edit',
+            'update' => 'units.update',
+            'destroy' => 'units.destroy',
         ]);
 
     // ==============================================
@@ -101,12 +101,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class)
         ->except(['show'])
         ->names([
-            'index' => 'admin.categories.index',
-            'create' => 'admin.categories.create',
-            'store' => 'admin.categories.store',
-            'edit' => 'admin.categories.edit',
-            'update' => 'admin.categories.update',
-            'destroy' => 'admin.categories.destroy',
+            'index' => 'categories.index',
+            'create' => 'categories.create',
+            'store' => 'categories.store',
+            'edit' => 'categories.edit',
+            'update' => 'categories.update',
+            'destroy' => 'categories.destroy',
         ]);
 
     // ==============================================
@@ -115,12 +115,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::resource('priorities', App\Http\Controllers\Admin\PriorityController::class)
         ->except(['show'])
         ->names([
-            'index' => 'admin.priorities.index',
-            'create' => 'admin.priorities.create',
-            'store' => 'admin.priorities.store',
-            'edit' => 'admin.priorities.edit',
-            'update' => 'admin.priorities.update',
-            'destroy' => 'admin.priorities.destroy',
+            'index' => 'priorities.index',
+            'create' => 'priorities.create',
+            'store' => 'priorities.store',
+            'edit' => 'priorities.edit',
+            'update' => 'priorities.update',
+            'destroy' => 'priorities.destroy',
         ]);
 
     // ==============================================
@@ -128,48 +128,48 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // ==============================================
     Route::prefix('tickets')->group(function () {
         // Phase 1: Basic CRUD
-        Route::get('/', [TicketController::class, 'index'])->name('admin.tickets.index');
-        Route::get('/my-tickets', [TicketController::class, 'myTickets'])->name('admin.tickets.my-tickets');
-        Route::get('/task-queue', [TicketController::class, 'taskQueue'])->name('admin.tickets.task-queue');
-        Route::get('/unit', [TicketController::class, 'unitTickets'])->name('admin.tickets.unit');
-        Route::get('/create', [TicketController::class, 'create'])->name('admin.tickets.create');
-        Route::post('/', [TicketController::class, 'store'])->name('admin.tickets.store');
+        Route::get('/', [TicketController::class, 'index'])->name('tickets.index');
+        Route::get('/my-tickets', [TicketController::class, 'myTickets'])->name('tickets.my-tickets');
+        Route::get('/task-queue', [TicketController::class, 'taskQueue'])->name('tickets.task-queue');
+        Route::get('/unit', [TicketController::class, 'unitTickets'])->name('tickets.unit');
+        Route::get('/create', [TicketController::class, 'create'])->name('tickets.create');
+        Route::post('/', [TicketController::class, 'store'])->name('tickets.store');
 
         // Phase 2: Triage & Assignment (static routes before wildcard)
-        Route::get('/triage', [TicketController::class, 'triage'])->name('admin.tickets.triage');
-        Route::get('/assigned', [TicketController::class, 'assignedTickets'])->name('admin.tickets.assigned');
+        Route::get('/triage', [TicketController::class, 'triage'])->name('tickets.triage');
+        Route::get('/assigned', [TicketController::class, 'assignedTickets'])->name('tickets.assigned');
 
         // Wildcard routes (must be after static routes)
-        Route::get('/{ticket}', [TicketController::class, 'show'])->name('admin.tickets.show');
-        Route::post('/{ticket}/triage', [TicketController::class, 'processTriage'])->name('admin.tickets.process-triage');
-        Route::post('/{ticket}/assign', [TicketController::class, 'assign'])->name('admin.tickets.assign');
-        Route::post('/{ticket}/self-handle', [TicketController::class, 'selfHandle'])->name('admin.tickets.self-handle');
-        Route::post('/{ticket}/accept', [TicketController::class, 'accept'])->name('admin.tickets.accept');
-        Route::post('/{ticket}/return', [TicketController::class, 'returnTicket'])->name('admin.tickets.return');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+        Route::post('/{ticket}/triage', [TicketController::class, 'processTriage'])->name('tickets.process-triage');
+        Route::post('/{ticket}/assign', [TicketController::class, 'assign'])->name('tickets.assign');
+        Route::post('/{ticket}/self-handle', [TicketController::class, 'selfHandle'])->name('tickets.self-handle');
+        Route::post('/{ticket}/accept', [TicketController::class, 'accept'])->name('tickets.accept');
+        Route::post('/{ticket}/return', [TicketController::class, 'returnTicket'])->name('tickets.return');
 
         // Phase 3: Work & Resolve
-        Route::post('/{ticket}/pending', [TicketController::class, 'setPending'])->name('admin.tickets.pending');
-        Route::post('/{ticket}/resume', [TicketController::class, 'resume'])->name('admin.tickets.resume');
-        Route::post('/{ticket}/request-approval', [TicketController::class, 'requestApproval'])->name('admin.tickets.request-approval');
-        Route::post('/{ticket}/approve', [TicketController::class, 'approve'])->name('admin.tickets.approve');
-        Route::post('/{ticket}/reject', [TicketController::class, 'reject'])->name('admin.tickets.reject');
-        Route::post('/{ticket}/resolve', [TicketController::class, 'resolve'])->name('admin.tickets.resolve');
+        Route::post('/{ticket}/pending', [TicketController::class, 'setPending'])->name('tickets.pending');
+        Route::post('/{ticket}/resume', [TicketController::class, 'resume'])->name('tickets.resume');
+        Route::post('/{ticket}/request-approval', [TicketController::class, 'requestApproval'])->name('tickets.request-approval');
+        Route::post('/{ticket}/approve', [TicketController::class, 'approve'])->name('tickets.approve');
+        Route::post('/{ticket}/reject', [TicketController::class, 'reject'])->name('tickets.reject');
+        Route::post('/{ticket}/resolve', [TicketController::class, 'resolve'])->name('tickets.resolve');
 
         // Phase 4: Close & Reopen
-        Route::post('/{ticket}/close', [TicketController::class, 'close'])->name('admin.tickets.close');
-        Route::post('/{ticket}/reopen', [TicketController::class, 'reopen'])->name('admin.tickets.reopen');
+        Route::post('/{ticket}/close', [TicketController::class, 'close'])->name('tickets.close');
+        Route::post('/{ticket}/reopen', [TicketController::class, 'reopen'])->name('tickets.reopen');
 
         // Comments
-        Route::post('/{ticket}/comments', [\App\Http\Controllers\Admin\TicketCommentController::class, 'store'])->name('admin.tickets.comments.store');
+        Route::post('/{ticket}/comments', [\App\Http\Controllers\Admin\TicketCommentController::class, 'store'])->name('tickets.comments.store');
     });
 
     // Comments (outside ticket prefix for update/delete)
-    Route::put('/comments/{comment}', [\App\Http\Controllers\Admin\TicketCommentController::class, 'update'])->name('admin.comments.update');
-    Route::delete('/comments/{comment}', [\App\Http\Controllers\Admin\TicketCommentController::class, 'destroy'])->name('admin.comments.destroy');
+    Route::put('/comments/{comment}', [\App\Http\Controllers\Admin\TicketCommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [\App\Http\Controllers\Admin\TicketCommentController::class, 'destroy'])->name('comments.destroy');
 
     // ==============================================
     // ATTACHMENTS
     // ==============================================
     Route::get('/attachments/{attachment}/download', [TicketAttachmentController::class, 'download'])
-        ->name('admin.attachments.download');
+        ->name('attachments.download');
 });

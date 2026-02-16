@@ -66,7 +66,7 @@ const canRequestApproval = computed(() => isInProgress.value)
 
 // Methods
 const submitPending = () => {
-    pendingForm.post(`/admin/tickets/${props.ticket.id}/pending`, {
+    pendingForm.post(`/tickets/${props.ticket.id}/pending`, {
         preserveScroll: true,
         onSuccess: () => {
             pendingForm.reset()
@@ -88,7 +88,7 @@ const resumeTicket = () => {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            useForm({ notes: 'Dilanjutkan' }).post(`/admin/tickets/${props.ticket.id}/resume`, {
+            useForm({ notes: 'Dilanjutkan' }).post(`/tickets/${props.ticket.id}/resume`, {
                 preserveScroll: true
             })
         }
@@ -96,7 +96,7 @@ const resumeTicket = () => {
 }
 
 const submitResolve = () => {
-    resolveForm.post(`/admin/tickets/${props.ticket.id}/resolve`, {
+    resolveForm.post(`/tickets/${props.ticket.id}/resolve`, {
         preserveScroll: true,
         onSuccess: () => {
             resolveForm.reset()
@@ -106,7 +106,7 @@ const submitResolve = () => {
 }
 
 const submitApproval = () => {
-    approvalForm.post(`/admin/tickets/${props.ticket.id}/request-approval`, {
+    approvalForm.post(`/tickets/${props.ticket.id}/request-approval`, {
         preserveScroll: true,
         onSuccess: () => {
             approvalForm.reset()

@@ -32,12 +32,12 @@ const props = defineProps({
 
 // Route name to URL mapping
 const routeUrls = {
-    'admin.tickets.index': '/admin/tickets',
-    'admin.tickets.my-tickets': '/admin/tickets/my-tickets',
-    'admin.tickets.unit': '/admin/tickets/unit',
+    'tickets.index': '/tickets',
+    'tickets.my-tickets': '/tickets/my-tickets',
+    'tickets.unit': '/tickets/unit',
 }
 
-const getUrl = () => routeUrls[props.routeName] || '/admin/tickets'
+const getUrl = () => routeUrls[props.routeName] || '/tickets'
 
 const search = ref(props.filters.search || '')
 const status = ref(props.filters.status || '')

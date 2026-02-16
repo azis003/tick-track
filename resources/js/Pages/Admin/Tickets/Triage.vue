@@ -31,7 +31,7 @@ const search = ref(props.filters.search || '')
 const categoryId = ref(props.filters.category_id || '')
 
 const applyFilters = debounce(() => {
-    router.get('/admin/tickets/triage', {
+    router.get('/tickets/triage', {
         search: search.value || undefined,
         category_id: categoryId.value || undefined
     }, {
@@ -153,7 +153,7 @@ const formatDate = (dateString) => {
                                 <div class="flex items-center gap-2">
                                     <RotateCcw v-if="ticket.return_reason" class="w-4 h-4 text-orange-500" />
                                     <Link
-                                        :href="`/admin/tickets/${ticket.id}`"
+                                        :href="`/tickets/${ticket.id}`"
                                         class="text-purple-600 hover:text-purple-800 font-mono text-sm font-medium"
                                     >
                                         {{ ticket.ticket_number }}
@@ -205,7 +205,7 @@ const formatDate = (dateString) => {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <Link
-                                    :href="`/admin/tickets/${ticket.id}`"
+                                    :href="`/tickets/${ticket.id}`"
                                     :class="[
                                         'inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors',
                                         ticket.return_reason 

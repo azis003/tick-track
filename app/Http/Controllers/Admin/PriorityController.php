@@ -99,7 +99,7 @@ class PriorityController extends Controller implements HasMiddleware
         ]);
 
         return redirect()
-            ->route('admin.priorities.index')
+            ->route('priorities.index')
             ->with('success', 'Prioritas berhasil ditambahkan.');
     }
 
@@ -154,7 +154,7 @@ class PriorityController extends Controller implements HasMiddleware
         ]);
 
         return redirect()
-            ->route('admin.priorities.index')
+            ->route('priorities.index')
             ->with('success', 'Prioritas berhasil diperbarui.');
     }
 
@@ -173,14 +173,14 @@ class PriorityController extends Controller implements HasMiddleware
 
         if ($totalTickets > 0) {
             return redirect()
-                ->route('admin.priorities.index')
+                ->route('priorities.index')
                 ->with('error', 'Prioritas tidak dapat dihapus karena masih digunakan oleh ' . $totalTickets . ' tiket.');
         }
 
         $priority->delete();
 
         return redirect()
-            ->route('admin.priorities.index')
+            ->route('priorities.index')
             ->with('success', 'Prioritas berhasil dihapus.');
     }
 }

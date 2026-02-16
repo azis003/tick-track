@@ -41,7 +41,7 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/categories',
+            '/categories',
             { search: newValue },
             { preserveState: true, replace: true }
         )
@@ -75,7 +75,7 @@ const getCategoryBadgeStyle = (color) => {
             title="Data Kategori"
             description="Kelola kategori tiket untuk klasifikasi permasalahan"
             :showButton="true"
-            action="/admin/categories/create"
+            action="/categories/create"
             actionText="Tambah Kategori"
             permission="categories.create"
         />
@@ -184,7 +184,7 @@ const getCategoryBadgeStyle = (color) => {
                                     <!-- Edit Button -->
                                     <Link
                                         v-if="hasAnyPermission(['categories.edit'])"
-                                        :href="`/admin/categories/${category.id}/edit`"
+                                        :href="`/categories/${category.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
@@ -194,7 +194,7 @@ const getCategoryBadgeStyle = (color) => {
                                     <!-- Delete Button -->
                                     <Delete
                                         v-if="hasAnyPermission(['categories.delete'])"
-                                        URL="/admin/categories"
+                                        URL="/categories"
                                         :id="category.id"
                                     />
                                 </div>

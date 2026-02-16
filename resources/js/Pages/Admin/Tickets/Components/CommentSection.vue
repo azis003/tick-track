@@ -48,7 +48,7 @@ const editForm = useForm({
 
 // Methods
 const submitComment = () => {
-    commentForm.post(`/admin/tickets/${props.ticket.id}/comments`, {
+    commentForm.post(`/tickets/${props.ticket.id}/comments`, {
         preserveScroll: true,
         onSuccess: () => {
             commentForm.reset()
@@ -67,7 +67,7 @@ const cancelEdit = () => {
 }
 
 const submitEdit = (commentId) => {
-    editForm.put(`/admin/comments/${commentId}`, {
+    editForm.put(`/comments/${commentId}`, {
         preserveScroll: true,
         onSuccess: () => {
             editingCommentId.value = null
@@ -78,7 +78,7 @@ const submitEdit = (commentId) => {
 
 const deleteComment = (commentId) => {
     if (confirm('Hapus komentar ini?')) {
-        useForm({}).delete(`/admin/comments/${commentId}`, {
+        useForm({}).delete(`/comments/${commentId}`, {
             preserveScroll: true
         })
     }
@@ -325,7 +325,7 @@ const handleFileUpload = (event) => {
                             <a 
                                 v-for="attachment in comment.attachments" 
                                 :key="attachment.id"
-                                :href="`/admin/attachments/${attachment.id}/download`"
+                                :href="`/attachments/${attachment.id}/download`"
                                 class="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded text-xs text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors"
                             >
                                 <Paperclip class="w-3 h-3" />

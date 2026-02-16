@@ -112,7 +112,7 @@ const handleAction = (ticket) => {
 }
 
 const getActionUrl = (ticket, actionType) => {
-    const baseUrl = `/admin/tickets/${ticket.id}`
+    const baseUrl = `/tickets/${ticket.id}`
     
     switch (actionType) {
         case 'triage':
@@ -130,7 +130,7 @@ const getActionUrl = (ticket, actionType) => {
 }
 
 const submitClose = () => {
-    confirmForm.post(`/admin/tickets/${selectedTicket.value.id}/close`, {
+    confirmForm.post(`/tickets/${selectedTicket.value.id}/close`, {
         onSuccess: () => {
             showConfirmModal.value = false
             selectedTicket.value = null
@@ -149,7 +149,7 @@ const submitReopen = () => {
         return
     }
     
-    confirmForm.post(`/admin/tickets/${selectedTicket.value.id}/reopen`, {
+    confirmForm.post(`/tickets/${selectedTicket.value.id}/reopen`, {
         onSuccess: () => {
             showConfirmModal.value = false
             selectedTicket.value = null
@@ -240,7 +240,7 @@ const getRowClasses = (ticket) => {
         <TicketFilters
             :filters="filters"
             :statuses="statuses"
-            route-name="admin.tickets.task-queue"
+            route-name="tickets.task-queue"
         />
 
         <!-- Task Queue Table -->
@@ -280,7 +280,7 @@ const getRowClasses = (ticket) => {
                         >
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <Link
-                                    :href="`/admin/tickets/${ticket.id}`"
+                                    :href="`/tickets/${ticket.id}`"
                                     class="text-blue-600 hover:text-blue-800 font-mono text-sm font-medium"
                                 >
                                     {{ ticket.ticket_number }}

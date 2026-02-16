@@ -166,27 +166,27 @@ const backUrl = computed(() => {
     // If coming from action mode, determine back URL based on action type
     if (actionMode.value === 'work') {
         // Staff working on ticket - go back to Task Queue
-        return '/admin/tickets/task-queue'
+        return '/tickets/task-queue'
     }
     if (actionMode.value === 'triage') {
         // Helpdesk triaging - go back to Task Queue
-        return '/admin/tickets/task-queue'
+        return '/tickets/task-queue'
     }
     if (actionMode.value === 'approve') {
         // Manager reviewing approval - go back to Task Queue
-        return '/admin/tickets/task-queue'
+        return '/tickets/task-queue'
     }
     
     // For regular view mode:
     // Creator viewing their ticket - go to Tiket Saya
     if (isCreator.value) {
-        return '/admin/tickets/my-tickets'
+        return '/tickets/my-tickets'
     }
     // Staff viewing ticket (not action mode) - go to Task Queue
     if (canTriage.value || isAssignedTechnician.value) {
-        return '/admin/tickets/task-queue'
+        return '/tickets/task-queue'
     }
-    return '/admin/tickets/my-tickets'
+    return '/tickets/my-tickets'
 })
 
 const formatDate = (dateString) => {

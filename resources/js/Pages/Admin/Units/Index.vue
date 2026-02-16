@@ -41,7 +41,7 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/units',
+            '/units',
             { search: newValue },
             { preserveState: true, replace: true }
         )
@@ -65,7 +65,7 @@ const getStatusBadgeClass = (isActive) => {
             title="Data Unit Kerja"
             description="Kelola unit kerja dan struktur organisasi"
             :showButton="true"
-            action="/admin/units/create"
+            action="/units/create"
             actionText="Tambah Unit"
             permission="units.create"
         />
@@ -176,7 +176,7 @@ const getStatusBadgeClass = (isActive) => {
                                     <!-- Edit Button -->
                                     <Link
                                         v-if="hasAnyPermission(['units.edit'])"
-                                        :href="`/admin/units/${unit.id}/edit`"
+                                        :href="`/units/${unit.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
@@ -186,7 +186,7 @@ const getStatusBadgeClass = (isActive) => {
                                     <!-- Delete Button -->
                                     <Delete
                                         v-if="hasAnyPermission(['units.delete'])"
-                                        URL="/admin/units"
+                                        URL="/units"
                                         :id="unit.id"
                                     />
                                 </div>

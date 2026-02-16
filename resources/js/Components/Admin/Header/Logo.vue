@@ -7,7 +7,7 @@ const { app } = usePage().props;
 </script>
 
 <template>
-    <Link href="/admin/dashboard">
+    <Link href="/dashboard">
         <div class="flex items-center flex-shrink-0">
             <!-- Logo Image -->
             <div class="relative">

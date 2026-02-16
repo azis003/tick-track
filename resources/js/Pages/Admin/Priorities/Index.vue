@@ -41,7 +41,7 @@ watch(search, (newValue) => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
         router.get(
-            '/admin/priorities',
+            '/priorities',
             { search: newValue },
             { preserveState: true, replace: true }
         )
@@ -86,7 +86,7 @@ const getEmojiByLevel = (level) => {
             title="Data Prioritas"
             description="Kelola tingkat urgensi tiket untuk pengelolaan SLA"
             :showButton="true"
-            action="/admin/priorities/create"
+            action="/priorities/create"
             actionText="Tambah Prioritas"
             permission="priorities.create"
         />
@@ -206,7 +206,7 @@ const getEmojiByLevel = (level) => {
                                     <!-- Edit Button -->
                                     <Link
                                         v-if="hasAnyPermission(['priorities.edit'])"
-                                        :href="`/admin/priorities/${priority.id}/edit`"
+                                        :href="`/priorities/${priority.id}/edit`"
                                         class="inline-flex items-center p-2 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white rounded-lg transition-all duration-200 shadow-sm"
                                         title="Edit"
                                     >
@@ -216,7 +216,7 @@ const getEmojiByLevel = (level) => {
                                     <!-- Delete Button -->
                                     <Delete
                                         v-if="hasAnyPermission(['priorities.delete'])"
-                                        URL="/admin/priorities"
+                                        URL="/priorities"
                                         :id="priority.id"
                                     />
                                 </div>

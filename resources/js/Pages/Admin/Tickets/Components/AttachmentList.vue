@@ -91,7 +91,7 @@ const formatDate = (dateString) => {
 
                 <!-- Download button -->
                 <a
-                    :href="`/admin/attachments/${attachment.id}/download`"
+                    :href="`/attachments/${attachment.id}/download`"
                     class="flex-shrink-0 p-2 text-gray-400 hover:text-blue-600 transition-colors"
                     title="Download"
                 >

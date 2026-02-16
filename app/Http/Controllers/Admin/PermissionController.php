@@ -74,7 +74,7 @@ class PermissionController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.permissions.index')
+            ->route('permissions.index')
             ->with('success', 'Permission berhasil ditambahkan.');
     }
 
@@ -122,7 +122,7 @@ class PermissionController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.permissions.index')
+            ->route('permissions.index')
             ->with('success', 'Permission berhasil diperbarui.');
     }
 
@@ -154,14 +154,14 @@ class PermissionController extends Controller
 
         if (in_array($permission->name, $protectedPermissions)) {
             return redirect()
-                ->route('admin.permissions.index')
+                ->route('permissions.index')
                 ->with('error', 'Permission sistem tidak dapat dihapus.');
         }
 
         // Check if permission is being used by any role
         if ($permission->roles()->count() > 0) {
             return redirect()
-                ->route('admin.permissions.index')
+                ->route('permissions.index')
                 ->with('error', 'Permission masih digunakan oleh ' . $permission->roles()->count() . ' role. Hapus dari role terlebih dahulu.');
         }
 
@@ -169,7 +169,7 @@ class PermissionController extends Controller
         $permission->delete();
 
         return redirect()
-            ->route('admin.permissions.index')
+            ->route('permissions.index')
             ->with('success', 'Permission berhasil dihapus.');
     }
 }

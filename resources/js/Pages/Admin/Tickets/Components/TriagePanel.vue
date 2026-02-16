@@ -49,7 +49,7 @@ const canSubmit = computed(() => {
 })
 
 const submitTriage = () => {
-    triageForm.post(`/admin/tickets/${props.ticket.id}/triage`, {
+    triageForm.post(`/tickets/${props.ticket.id}/triage`, {
         preserveScroll: true,
         onSuccess: () => {
             triageForm.reset()

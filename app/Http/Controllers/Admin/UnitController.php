@@ -106,7 +106,7 @@ class UnitController extends Controller implements HasMiddleware
         ]);
 
         return redirect()
-            ->route('admin.units.index')
+            ->route('units.index')
             ->with('success', 'Unit Kerja berhasil ditambahkan.');
     }
 
@@ -165,7 +165,7 @@ class UnitController extends Controller implements HasMiddleware
         ]);
 
         return redirect()
-            ->route('admin.units.index')
+            ->route('units.index')
             ->with('success', 'Unit Kerja berhasil diperbarui.');
     }
 
@@ -180,14 +180,14 @@ class UnitController extends Controller implements HasMiddleware
         // Cek apakah ada anggota di unit ini
         if ($unit->members()->count() > 0) {
             return redirect()
-                ->route('admin.units.index')
+                ->route('units.index')
                 ->with('error', 'Unit tidak dapat dihapus karena masih memiliki ' . $unit->members()->count() . ' anggota.');
         }
 
         $unit->delete();
 
         return redirect()
-            ->route('admin.units.index')
+            ->route('units.index')
             ->with('success', 'Unit Kerja berhasil dihapus.');
     }
 }
